@@ -51,14 +51,6 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40">
-          <span className="text-[10px] font-body uppercase tracking-[0.3em] text-stardust/50">
-            Scroll
-          </span>
-          <div className="w-px h-8 bg-gradient-to-b from-stardust/40 to-transparent" />
-        </div>
       </section>
 
       {/* ===== ABOUT ===== */}
@@ -79,15 +71,10 @@ export default function HomePage() {
                   finishing under a full moon.
                 </p>
                 <p>
-                  This isn&apos;t a massive corporate race. It&apos;s a community event
+                  This is a community event
                   built by runners, for runners. We&apos;ve been building Commonwealth
                   for three years in Brooklyn, and this is our first official race. We
                   want it to feel special.
-                </p>
-                <p>
-                  Expect a well-organized, intimate race with pace groups, hydration
-                  stations, post-race refreshments, and vibes that only Brooklyn
-                  can deliver.
                 </p>
               </div>
             </div>
@@ -148,8 +135,8 @@ export default function HomePage() {
             {[
               {
                 icon: '🏃',
-                title: 'Timed Race',
-                desc: 'Chip-timed results with pace tracking and official finish times.',
+                title: 'Self Timed Race',
+                desc: 'Start your race with Strava at the start and end with us at the finish line!',
               },
               {
                 icon: '👕',
@@ -157,24 +144,9 @@ export default function HomePage() {
                 desc: 'Custom Blue Moon 5 Miler tee. Available in XS–XXL.',
               },
               {
-                icon: '🎽',
-                title: 'Bib & Number',
-                desc: 'Your official bib with a unique race number, assigned at registration.',
-              },
-              {
-                icon: '💧',
-                title: 'Hydration',
-                desc: 'Water stations along the course and at the finish line.',
-              },
-              {
                 icon: '🍺',
                 title: 'Post-Race Party',
                 desc: 'Complimentary drinks, snacks, and community vibes after the race.',
-              },
-              {
-                icon: '🏆',
-                title: 'Awards',
-                desc: 'Top finishers recognized in overall and age group categories.',
               },
             ].map((item) => (
               <div key={item.title} className="card p-6">
@@ -238,16 +210,8 @@ export default function HomePage() {
                 a: 'Street parking is available around Prospect Park. We recommend taking the subway (B/Q to Prospect Park, or 2/3 to Grand Army Plaza).',
               },
               {
-                q: 'Is this race USATF certified?',
-                a: 'We are working on USATF certification for the course. More details will be shared as we finalize logistics.',
-              },
-              {
                 q: 'Are refunds available?',
                 a: 'Full refunds are available up to 14 days before race day. After that, registrations can be transferred to another runner.',
-              },
-              {
-                q: 'Will there be pace groups?',
-                a: 'Yes! We\'ll have pace group leaders for 7:00, 8:00, 9:00, and 10:00+ min/mile groups.',
               },
             ].map((item) => (
               <div key={item.q} className="card px-6 py-5">
