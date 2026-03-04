@@ -12,7 +12,6 @@ export interface Registration {
   shirt_size?: 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL';
   payment_status: 'pending' | 'completed' | 'failed' | 'refunded';
   stripe_payment_intent_id?: string;
-  promo_code_id?: string;
   amount_paid: number;
   bib_number?: number;
   created_at: string;

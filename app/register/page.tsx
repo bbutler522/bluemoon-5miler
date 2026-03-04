@@ -6,17 +6,9 @@ import { createClient } from '@/lib/supabase-browser';
 import { Moon } from '@/components/Moon';
 import { RACE_INFO } from '@/lib/constants';
 import { SHIRT_SIZES, GENDER_OPTIONS } from '@/lib/constants';
-import { Loader2, CheckCircle2, AlertCircle, Tag } from 'lucide-react';
+import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 
 const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
-
-interface PromoResult {
-  valid: boolean;
-  discount_type?: string;
-  discount_value?: number;
-  final_price?: number;
-  message?: string;
-}
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -38,13 +30,6 @@ export default function RegisterPage() {
   const [gender, setGender] = useState('');
   const [shirtSize, setShirtSize] = useState('');
 
-  // Promo code
-  const [promoCode, setPromoCode] = useState('');
-  const [promoResult, setPromoResult] = useState<PromoResult | null>(null);
-  const [promoLoading, setPromoLoading] = useState(false);
-
-  const finalPrice = promoResult?.valid ? promoResult.final_price! : RACE_INFO.price;
-
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
@@ -59,26 +44,6 @@ export default function RegisterPage() {
       }
     });
   }, []);
-
-  async function validatePromo() {
-    if (!promoCode.trim()) return;
-    setPromoLoading(true);
-    setPromoResult(null);
-
-    try {
-      const res = await fetch('/api/promo-codes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: promoCode.trim().toUpperCase() }),
-      });
-      const data = await res.json();
-      setPromoResult(data);
-    } catch {
-      setPromoResult({ valid: false, message: 'Failed to validate code' });
-    } finally {
-      setPromoLoading(false);
-    }
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -104,7 +69,6 @@ export default function RegisterPage() {
           date_of_birth: dob || null,
           gender: gender || null,
           shirt_size: shirtSize || null,
-          promo_code: promoResult?.valid ? promoCode.trim().toUpperCase() : null,
         }),
       });
 
@@ -117,7 +81,7 @@ export default function RegisterPage() {
         return;
       }
 
-      // Live mode — redirect to Stripe Checkout
+      // Live mode — redirect to Stripe Payment Link
       if (data.checkout_url) {
         window.location.href = data.checkout_url;
       } else {
@@ -314,74 +278,18 @@ export default function RegisterPage() {
             </div>
           </fieldset>
 
-          {/* Promo code */}
-          <fieldset>
-            <legend className="label-field mb-2">Promo Code</legend>
-            <div className="flex gap-3">
-              <div className="relative flex-1">
-                <Tag
-                  size={14}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stardust/30"
-                />
-                <input
-                  type="text"
-                  value={promoCode}
-                  onChange={(e) => {
-                    setPromoCode(e.target.value);
-                    setPromoResult(null);
-                  }}
-                  className="input-field !pl-9"
-                  placeholder="Enter code"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={validatePromo}
-                disabled={promoLoading || !promoCode.trim()}
-                className="btn-secondary !py-0 !px-5 !text-xs disabled:opacity-30"
-              >
-                {promoLoading ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  'Apply'
-                )}
-              </button>
-            </div>
-            {promoResult && (
-              <p
-                className={`text-xs mt-2 ${
-                  promoResult.valid ? 'text-green-400' : 'text-red-400'
-                }`}
-              >
-                {promoResult.message}
-              </p>
-            )}
-          </fieldset>
-
           {/* Price summary */}
           <div className="card p-5">
             <div className="flex justify-between items-center">
               <span className="text-sm text-stardust/60">Race entry</span>
-              <span
-                className={`text-sm ${
-                  promoResult?.valid ? 'line-through text-stardust/30' : 'text-moonlight'
-                }`}
-              >
+              <span className="text-sm text-moonlight">
                 ${RACE_INFO.price.toFixed(2)}
               </span>
             </div>
-            {promoResult?.valid && (
-              <div className="flex justify-between items-center mt-1">
-                <span className="text-sm text-green-400">Discount</span>
-                <span className="text-sm text-green-400">
-                  -${(RACE_INFO.price - finalPrice).toFixed(2)}
-                </span>
-              </div>
-            )}
             <div className="border-t border-lunar-400/10 mt-3 pt-3 flex justify-between items-center">
               <span className="text-sm font-semibold text-moonlight">Total</span>
               <span className="font-display text-xl text-moonlight">
-                ${finalPrice.toFixed(2)}
+                ${RACE_INFO.price.toFixed(2)}
               </span>
             </div>
           </div>
@@ -405,9 +313,9 @@ export default function RegisterPage() {
                 Processing...
               </>
             ) : isDemoMode ? (
-              `Register (Demo) — $${finalPrice.toFixed(2)}`
+              `Register (Demo) — $${RACE_INFO.price.toFixed(2)}`
             ) : (
-              `Pay $${finalPrice.toFixed(2)} & Register`
+              `Pay $${RACE_INFO.price.toFixed(2)} & Register`
             )}
           </button>
 

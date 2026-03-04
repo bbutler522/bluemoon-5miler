@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase, createAdminSupabase } from '@/lib/supabase-server';
-import { stripe, RACE_PRICE_CENTS, DEMO_MODE } from '@/lib/stripe';
+import { PAYMENT_LINK_URL } from '@/lib/stripe';
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = createServerSupabase();
     const admin = createAdminSupabase();
+    const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
 
     // Verify user is authenticated
     const {
@@ -31,10 +32,8 @@ export async function POST(request: NextRequest) {
       date_of_birth,
       gender,
       shirt_size,
-      promo_code,
     } = body;
 
-    // Validate required fields
     if (!first_name || !last_name || !email) {
       return NextResponse.json(
         { error: 'First name, last name, and email are required' },
@@ -42,7 +41,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for existing registration
+    // Check for existing completed registration
     const { data: existingReg } = await admin
       .from('registrations')
       .select('id, payment_status')
@@ -57,110 +56,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate price with promo code
-    let amountCents = RACE_PRICE_CENTS;
-    let promoCodeId = null;
-
-    if (promo_code) {
-      const { data: promo } = await admin
-        .from('promo_codes')
-        .select('*')
-        .eq('code', promo_code.toUpperCase())
-        .eq('is_active', true)
-        .maybeSingle();
-
-      if (promo) {
-        const now = new Date();
-        const validFrom = promo.valid_from ? new Date(promo.valid_from) : null;
-        const validUntil = promo.valid_until ? new Date(promo.valid_until) : null;
-
-        const isTimeValid =
-          (!validFrom || now >= validFrom) &&
-          (!validUntil || now <= validUntil);
-
-        const hasUsesLeft =
-          promo.max_uses === null || promo.current_uses < promo.max_uses;
-
-        if (isTimeValid && hasUsesLeft) {
-          promoCodeId = promo.id;
-
-          if (promo.discount_type === 'percentage') {
-            amountCents = Math.round(
-              amountCents * (1 - promo.discount_value / 100)
-            );
-          } else {
-            amountCents = Math.max(0, amountCents - promo.discount_value * 100);
-          }
-        }
-      }
-    }
-
-    amountCents = Math.max(amountCents, 100);
-
-    // ──────────────────────────────────────────────
-    // DEMO MODE: skip Stripe, auto-confirm
-    // ──────────────────────────────────────────────
-    if (DEMO_MODE) {
-      const registrationData = {
-        user_id: user.id,
-        first_name,
-        last_name,
-        email,
-        phone: phone || null,
-        emergency_contact_name: emergency_contact_name || null,
-        emergency_contact_phone: emergency_contact_phone || null,
-        date_of_birth: date_of_birth || null,
-        gender: gender || null,
-        shirt_size: shirt_size || null,
-        promo_code_id: promoCodeId,
-        amount_paid: amountCents / 100,
-        payment_status: 'completed',
-        stripe_payment_intent_id: `demo_${Date.now()}`,
-      };
-
-      if (existingReg) {
-        await admin
-          .from('registrations')
-          .update(registrationData)
-          .eq('id', existingReg.id);
-      } else {
-        const { error: insertError } = await admin
-          .from('registrations')
-          .insert(registrationData);
-
-        if (insertError) throw insertError;
-      }
-
-      // Increment promo code usage in demo mode too
-      if (promoCodeId) {
-        const { data: promo } = await admin
-          .from('promo_codes')
-          .select('current_uses')
-          .eq('id', promoCodeId)
-          .single();
-
-        if (promo) {
-          await admin
-            .from('promo_codes')
-            .update({ current_uses: (promo.current_uses || 0) + 1 })
-            .eq('id', promoCodeId);
-        }
-      }
-
-      // Return a flag so the frontend knows to redirect directly
-      return NextResponse.json({ demo: true, redirect: '/dashboard?payment=success' });
-    }
-
-    // ──────────────────────────────────────────────
-    // LIVE MODE: use Stripe Checkout
-    // ──────────────────────────────────────────────
-    if (!stripe) {
-      return NextResponse.json(
-        { error: 'Payment processing is not configured. Set STRIPE_SECRET_KEY or enable DEMO_MODE.' },
-        { status: 500 }
-      );
-    }
-
+    // Build registration data (no more promo code logic — Stripe handles it)
     const registrationData = {
       user_id: user.id,
       first_name,
@@ -172,20 +68,16 @@ export async function POST(request: NextRequest) {
       date_of_birth: date_of_birth || null,
       gender: gender || null,
       shirt_size: shirt_size || null,
-      promo_code_id: promoCodeId,
-      amount_paid: amountCents / 100,
       payment_status: 'pending',
     };
 
     let registrationId: string;
 
     if (existingReg) {
-      const { error: updateError } = await admin
+      await admin
         .from('registrations')
         .update(registrationData)
         .eq('id', existingReg.id);
-
-      if (updateError) throw updateError;
       registrationId = existingReg.id;
     } else {
       const { data: newReg, error: insertError } = await admin
@@ -193,45 +85,38 @@ export async function POST(request: NextRequest) {
         .insert(registrationData)
         .select('id')
         .single();
-
       if (insertError) throw insertError;
       registrationId = newReg.id;
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    // === DEMO MODE ===
+    if (isDemo) {
+      const { data: maxBib } = await admin
+        .from('registrations')
+        .select('bib_number')
+        .order('bib_number', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'payment',
-      customer_email: email,
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: 'Blue Moon 5 Miler — Race Entry',
-              description: `Registration for ${first_name} ${last_name}`,
-            },
-            unit_amount: amountCents,
-          },
-          quantity: 1,
-        },
-      ],
-      metadata: {
-        registration_id: registrationId,
-        user_id: user.id,
-        promo_code_id: promoCodeId || '',
-      },
-      success_url: `${baseUrl}/dashboard?payment=success`,
-      cancel_url: `${baseUrl}/register?payment=cancelled`,
-    });
+      const nextBib = (maxBib?.bib_number || 100) + 1;
 
-    await admin
-      .from('registrations')
-      .update({ stripe_payment_intent_id: session.id })
-      .eq('id', registrationId);
+      await admin
+        .from('registrations')
+        .update({
+          payment_status: 'completed',
+          bib_number: nextBib,
+          amount_paid: 50,
+        })
+        .eq('id', registrationId);
 
-    return NextResponse.json({ checkout_url: session.url });
+      return NextResponse.json({ demo: true, redirect: '/dashboard?payment=success' });
+    }
+
+    // === LIVE MODE — just return the Payment Link URL ===
+    // client_reference_id ties the Stripe payment back to our registration
+    const checkoutUrl = `${PAYMENT_LINK_URL}?client_reference_id=${registrationId}&prefilled_email=${encodeURIComponent(email)}`;
+
+    return NextResponse.json({ checkout_url: checkoutUrl });
   } catch (error: any) {
     console.error('Registration error:', error);
     return NextResponse.json(

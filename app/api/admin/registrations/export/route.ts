@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
   let query = admin
     .from('registrations')
-    .select('*, promo_codes(code)')
+    .select('*')
     .order('created_at', { ascending: true });
 
   if (status && status !== 'all') {
@@ -43,7 +43,6 @@ export async function GET(request: NextRequest) {
     'Emergency Phone',
     'Payment Status',
     'Amount Paid',
-    'Promo Code',
     'Registered At',
   ];
 
@@ -60,7 +59,6 @@ export async function GET(request: NextRequest) {
     r.emergency_contact_phone || '',
     r.payment_status,
     r.amount_paid,
-    r.promo_codes?.code || '',
     new Date(r.created_at).toISOString(),
   ]);
 

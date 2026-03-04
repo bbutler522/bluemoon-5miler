@@ -18,7 +18,6 @@ import {
   Hash,
   CreditCard,
   AlertTriangle,
-  Tag,
 } from 'lucide-react';
 import { SHIRT_SIZES } from '@/lib/constants';
 
@@ -338,21 +337,6 @@ export default function AdminRegistrationDetail() {
               )}
             </div>
           </div>
-
-          {reg.promo_codes && (
-            <div>
-              <label className="label-field">Promo Code</label>
-              <p className="text-sm text-moonlight flex items-center gap-2">
-                <Tag size={12} className="text-stardust/40" />
-                {reg.promo_codes.code}
-                <span className="text-[10px] text-stardust/40 bg-midnight-800/60 rounded px-2 py-0.5">
-                  {reg.promo_codes.discount_type === 'percentage'
-                    ? `${reg.promo_codes.discount_value}% off`
-                    : `$${reg.promo_codes.discount_value} off`}
-                </span>
-              </p>
-            </div>
-          )}
 
           <div>
             <label className="label-field">Stripe Reference</label>

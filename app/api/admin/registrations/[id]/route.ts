@@ -17,7 +17,7 @@ export async function GET(
 
   const { data: registration, error } = await admin
     .from('registrations')
-    .select('*, promo_codes(code, discount_type, discount_value)')
+    .select('*')
     .eq('id', params.id)
     .single();
 

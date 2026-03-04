@@ -38,8 +38,6 @@ export interface AdminRegistration {
   payment_status: string;
   amount_paid: number;
   bib_number: number | null;
-  promo_code_id: string | null;
-  promo_code?: string | null;
   created_at: string;
   updated_at: string;
 }

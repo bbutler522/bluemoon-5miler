@@ -25,19 +25,8 @@ interface Stats {
   registrationsByDay: { date: string; count: number }[];
 }
 
-interface PromoCode {
-  id: string;
-  code: string;
-  discount_type: string;
-  discount_value: number;
-  max_uses: number | null;
-  current_uses: number;
-  is_active: boolean;
-}
-
 export default function AdminOverview() {
   const [stats, setStats] = useState<Stats | null>(null);
-  const [promoCodes, setPromoCodes] = useState<PromoCode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -47,7 +36,6 @@ export default function AdminOverview() {
       .then((data) => {
         if (data.error) throw new Error(data.error);
         setStats(data.stats);
-        setPromoCodes(data.promoCodes || []);
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
@@ -209,57 +197,23 @@ export default function AdminOverview() {
         </div>
       </div>
 
-      {/* Promo code usage */}
+      {/* Promo codes now managed in Stripe */}
       <div className="card p-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-2">
           <p className="text-xs font-semibold uppercase tracking-widest text-stardust/40">
-            Promo Code Usage
+            Promo Codes
           </p>
           <Link
             href="/admin/promo-codes"
             className="text-xs text-stardust/40 hover:text-moonlight transition-colors"
           >
-            Manage →
+            Details →
           </Link>
         </div>
-        {promoCodes.length === 0 ? (
-          <p className="text-sm text-stardust/30 py-4 text-center">No promo codes</p>
-        ) : (
-          <div className="space-y-2">
-            {promoCodes.map((code) => (
-              <div
-                key={code.id}
-                className="flex items-center justify-between bg-midnight-900/40 rounded-lg px-4 py-3"
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`font-mono text-sm font-semibold ${
-                      code.is_active ? 'text-moonlight' : 'text-stardust/30 line-through'
-                    }`}
-                  >
-                    {code.code}
-                  </span>
-                  <span className="text-[10px] text-stardust/40 bg-midnight-800/60 rounded px-2 py-0.5">
-                    {code.discount_type === 'percentage'
-                      ? `${code.discount_value}% off`
-                      : `$${code.discount_value} off`}
-                  </span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-xs text-stardust/40 font-mono">
-                    {code.current_uses}
-                    {code.max_uses !== null ? ` / ${code.max_uses}` : ''} used
-                  </span>
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      code.is_active ? 'bg-green-400' : 'bg-stardust/20'
-                    }`}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <p className="text-xs text-stardust/40">
+          Discounts and promotion codes are now configured directly in your Stripe Dashboard
+          and applied through the Payment Link.
+        </p>
       </div>
 
       {/* Quick links */}

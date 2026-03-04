@@ -1,41 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { stripe, DEMO_MODE } from '@/lib/stripe';
 import { createAdminSupabase } from '@/lib/supabase-server';
+import { stripe } from '@/lib/stripe';
 import Stripe from 'stripe';
 
-// Disable body parsing — Stripe needs the raw body for signature verification
-export const runtime = 'nodejs';
-
 export async function POST(request: NextRequest) {
-  // In demo mode, webhooks aren't used
-  if (DEMO_MODE || !stripe) {
-    return NextResponse.json({ received: true, demo: true });
+  // Demo mode — no webhooks needed
+  if (!stripe) {
+    return NextResponse.json({ received: true });
   }
 
   const body = await request.text();
-  const signature = request.headers.get('stripe-signature');
+  const sig = request.headers.get('stripe-signature');
 
-  if (!signature) {
-    return NextResponse.json(
-      { error: 'Missing stripe-signature header' },
-      { status: 400 }
-    );
+  if (!sig) {
+    return NextResponse.json({ error: 'No signature' }, { status: 400 });
   }
 
   let event: Stripe.Event;
 
   try {
-    event = stripe!.webhooks.constructEvent(
+    event = stripe.webhooks.constructEvent(
       body,
-      signature,
+      sig,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err: any) {
     console.error('Webhook signature verification failed:', err.message);
-    return NextResponse.json(
-      { error: 'Webhook signature verification failed' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
   const admin = createAdminSupabase();
@@ -44,64 +35,53 @@ export async function POST(request: NextRequest) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
-        const { registration_id, promo_code_id } = session.metadata || {};
 
-        if (!registration_id) {
-          console.error('No registration_id in session metadata');
+        // Payment Links use client_reference_id (not metadata)
+        const registrationId = session.client_reference_id;
+
+        if (!registrationId) {
+          console.warn('No client_reference_id on session', session.id);
           break;
         }
 
-        // Update registration to completed
-        const { error: updateError } = await admin
+        // Get the actual amount paid (accounts for promo codes)
+        const amountPaid = (session.amount_total || 5000) / 100;
+
+        // Assign next bib number
+        const { data: maxBib } = await admin
+          .from('registrations')
+          .select('bib_number')
+          .order('bib_number', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        const nextBib = (maxBib?.bib_number || 100) + 1;
+
+        await admin
           .from('registrations')
           .update({
             payment_status: 'completed',
+            amount_paid: amountPaid,
+            bib_number: nextBib,
             stripe_payment_intent_id: session.payment_intent as string,
-            amount_paid: (session.amount_total || 0) / 100,
           })
-          .eq('id', registration_id);
+          .eq('id', registrationId);
 
-        if (updateError) {
-          console.error('Failed to update registration:', updateError);
-          throw updateError;
-        }
-
-        // Increment promo code usage
-        if (promo_code_id) {
-          await admin.rpc('increment_promo_usage', {
-            promo_id: promo_code_id,
-          });
-
-          // Fallback if RPC doesn't exist yet: manual increment
-          const { data: promo } = await admin
-            .from('promo_codes')
-            .select('current_uses')
-            .eq('id', promo_code_id)
-            .single();
-
-          if (promo) {
-            await admin
-              .from('promo_codes')
-              .update({ current_uses: (promo.current_uses || 0) + 1 })
-              .eq('id', promo_code_id);
-          }
-        }
-
-        console.log(`✅ Registration ${registration_id} confirmed`);
+        console.log(`✅ Registration ${registrationId} confirmed — bib #${nextBib}`);
         break;
       }
 
       case 'checkout.session.expired': {
         const session = event.data.object as Stripe.Checkout.Session;
-        const { registration_id } = session.metadata || {};
+        const registrationId = session.client_reference_id;
 
-        if (registration_id) {
+        if (registrationId) {
           await admin
             .from('registrations')
             .update({ payment_status: 'failed' })
-            .eq('id', registration_id);
+            .eq('id', registrationId);
 
-          console.log(`❌ Registration ${registration_id} expired`);
+          console.log(`❌ Registration ${registrationId} expired`);
         }
         break;
       }

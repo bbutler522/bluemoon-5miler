@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
   let query = admin
     .from('registrations')
-    .select('*, promo_codes(code)', { count: 'exact' });
+    .select('*', { count: 'exact' });
 
   // Filter by status
   if (status && status !== 'all') {
@@ -50,15 +50,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Flatten promo code join
-  const formatted = (registrations || []).map((r: any) => ({
-    ...r,
-    promo_code: r.promo_codes?.code || null,
-    promo_codes: undefined,
-  }));
-
   return NextResponse.json({
-    registrations: formatted,
+    registrations: registrations || [],
     total: count || 0,
     page,
     limit,

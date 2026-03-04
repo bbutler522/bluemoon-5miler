@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
   const { data: registration } = await admin
     .from('registrations')
-    .select('*, promo_codes(code, discount_type, discount_value)')
+    .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(1)

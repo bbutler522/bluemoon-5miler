@@ -63,12 +63,6 @@ export async function GET(request: NextRequest) {
     .slice(-30)
     .map(([date, count]) => ({ date, count }));
 
-  // Promo code usage
-  const { data: promoCodes } = await admin
-    .from('promo_codes')
-    .select('*')
-    .order('current_uses', { ascending: false });
-
   return NextResponse.json({
     stats: {
       total: regs.length,
@@ -82,6 +76,5 @@ export async function GET(request: NextRequest) {
       genderBreakdown,
       registrationsByDay,
     },
-    promoCodes: promoCodes || [],
   });
 }
