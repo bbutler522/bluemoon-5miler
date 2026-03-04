@@ -1,0 +1,136 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-midnight: #060e2a;
+    --color-deep: #0a1744;
+    --color-navy: #0f2272;
+    --color-moonlight: #e8eeff;
+    --color-stardust: #b8c8f0;
+    --color-lunar: #c8d0eb;
+    --color-accent: #4a6cf7;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--color-midnight);
+    color: var(--color-moonlight);
+  }
+
+  ::selection {
+    background-color: rgba(74, 108, 247, 0.3);
+    color: white;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply relative inline-flex items-center justify-center px-8 py-3.5
+           bg-gradient-to-r from-midnight-500 to-midnight-400
+           text-white font-body font-semibold text-sm tracking-wide uppercase
+           rounded-full border border-lunar-400/20
+           transition-all duration-300 ease-out
+           hover:border-lunar-400/40 hover:shadow-[0_0_30px_rgba(74,108,247,0.3)]
+           active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply relative inline-flex items-center justify-center px-8 py-3.5
+           bg-transparent
+           text-moonlight font-body font-semibold text-sm tracking-wide uppercase
+           rounded-full border border-lunar-400/30
+           transition-all duration-300 ease-out
+           hover:bg-midnight-800/50 hover:border-lunar-400/50
+           active:scale-[0.98];
+  }
+
+  .card {
+    @apply relative bg-midnight-900/60 backdrop-blur-sm
+           border border-lunar-400/10 rounded-2xl
+           transition-all duration-300
+           hover:border-lunar-400/20;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-midnight-900/80 border border-lunar-400/15
+           rounded-xl text-moonlight placeholder:text-lunar-500/50
+           font-body text-sm
+           focus:outline-none focus:border-midnight-400/60 focus:ring-1 focus:ring-midnight-400/30
+           transition-all duration-200;
+  }
+
+  .label-field {
+    @apply block text-xs font-body font-semibold text-stardust/70 uppercase tracking-widest mb-2;
+  }
+
+  /* Star field background */
+  .starfield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .starfield::before,
+  .starfield::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+      radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1px 1px at 40px 70px, rgba(255,255,255,0.3), transparent),
+      radial-gradient(1px 1px at 50px 160px, rgba(255,255,255,0.2), transparent),
+      radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.2), transparent),
+      radial-gradient(1.5px 1.5px at 160px 120px, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1px 1px at 200px 50px, rgba(255,255,255,0.3), transparent),
+      radial-gradient(1px 1px at 250px 180px, rgba(255,255,255,0.25), transparent),
+      radial-gradient(1px 1px at 300px 90px, rgba(255,255,255,0.35), transparent),
+      radial-gradient(1.5px 1.5px at 350px 140px, rgba(255,255,255,0.45), transparent);
+    background-size: 400px 200px;
+    animation: drift 60s linear infinite;
+  }
+
+  .starfield::after {
+    background-size: 600px 300px;
+    opacity: 0.5;
+    animation-duration: 90s;
+    animation-direction: reverse;
+  }
+
+  @keyframes drift {
+    from { transform: translateY(0); }
+    to { transform: translateY(-200px); }
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-midnight);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(184, 200, 240, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(184, 200, 240, 0.35);
+}
