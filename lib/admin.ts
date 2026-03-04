@@ -1,8 +1,8 @@
 // Admin access control
 // Add club organizer emails here — keeps it simple without extra DB tables
 const ADMIN_EMAILS: string[] = [
-  // Add your email(s) here:
-  // 'brennan@commonwealthrunclub.com',
+  // Add your email(s) here (must match the email you use to sign in):
+  'bbutler522@gmail.com',
 ];
 
 export function isAdmin(email: string | undefined): boolean {
