@@ -1,25 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import { Moon } from '@/components/Moon';
 import { Loader2 } from 'lucide-react';
 
-type Mode = 'login' | 'signup';
-
 export default function LoginForm() {
-  const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/dashboard';
+  const redirect = searchParams.get('redirect') || '/register';
   const supabase = createClient();
 
   async function handleSubmit(e: React.FormEvent) {
@@ -29,26 +23,18 @@ export default function LoginForm() {
     setMessage('');
 
     try {
-      if (mode === 'signup') {
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { full_name: fullName },
-            emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${redirect}`,
-          },
-        });
-        if (signUpError) throw signUpError;
-        setMessage('Check your email for a confirmation link.');
-      } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (signInError) throw signInError;
-        router.push(redirect);
-        router.refresh();
-      }
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}${redirect}`,
+        },
+      });
+
+      if (otpError) throw otpError;
+
+      setMessage(
+        'Check your email for a magic link. It will log you in and take you to your registration.'
+      );
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
     } finally {
@@ -65,29 +51,13 @@ export default function LoginForm() {
         </div>
 
         <h1 className="font-display text-2xl text-moonlight text-center mb-1">
-          {mode === 'login' ? 'Welcome back' : 'Create account'}
+          Get a magic link
         </h1>
         <p className="text-xs text-stardust/40 text-center mb-8">
-          {mode === 'login'
-            ? 'Sign in to manage your registration.'
-            : 'Sign up to register for the Blue Moon 5 Miler.'}
+          Enter your email and we&apos;ll send you a secure link to register for the Blue Moon 5 Miler and access your dashboard.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {mode === 'signup' && (
-            <div>
-              <label className="label-field">Full Name</label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="input-field"
-                placeholder="Jane Doe"
-                required
-              />
-            </div>
-          )}
-
           <div>
             <label className="label-field">Email</label>
             <input
@@ -97,19 +67,6 @@ export default function LoginForm() {
               className="input-field"
               placeholder="you@example.com"
               required
-            />
-          </div>
-
-          <div>
-            <label className="label-field">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="input-field"
-              placeholder="••••••••"
-              required
-              minLength={6}
             />
           </div>
 
@@ -131,40 +88,12 @@ export default function LoginForm() {
             className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading && <Loader2 size={16} className="animate-spin mr-2" />}
-            {mode === 'login' ? 'Sign In' : 'Sign Up'}
+            Send magic link
           </button>
         </form>
 
-        <p className="text-center text-xs text-stardust/40 mt-6">
-          {mode === 'login' ? (
-            <>
-              Don&apos;t have an account?{' '}
-              <button
-                onClick={() => {
-                  setMode('signup');
-                  setError('');
-                  setMessage('');
-                }}
-                className="text-moonlight hover:underline"
-              >
-                Sign up
-              </button>
-            </>
-          ) : (
-            <>
-              Already have an account?{' '}
-              <button
-                onClick={() => {
-                  setMode('login');
-                  setError('');
-                  setMessage('');
-                }}
-                className="text-moonlight hover:underline"
-              >
-                Sign in
-              </button>
-            </>
-          )}
+        <p className="text-center text-[11px] text-stardust/40 mt-6">
+          No passwords, no accounts to remember — just a secure link sent to your inbox.
         </p>
       </div>
     </section>
