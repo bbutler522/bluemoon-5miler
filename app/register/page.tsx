@@ -41,6 +41,8 @@ export default function RegisterPage() {
           setFirstName(parts[0] || '');
           setLastName(parts.slice(1).join(' ') || '');
         }
+      } else {
+        router.push('/login?redirect=/register');
       }
     });
   }, []);
