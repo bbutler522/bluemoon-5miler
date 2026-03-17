@@ -25,11 +25,11 @@ const monoFont = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Blue Moon 5 Miler — Commonwealth Running Club',
   description:
-    'Run under the full moon at Prospect Park. Brooklyn\'s Commonwealth Running Club presents the Blue Moon 5 Miler on May 31, 2026.',
+    'A blue moon only comes around once every three years. We’re running it. Join us for a 5-mile night race in Prospect Park on Sunday, May 31st at 8:00 PM.',
   keywords: ['running', 'race', 'Brooklyn', 'Prospect Park', '5 mile', 'Blue Moon', 'Commonwealth'],
   openGraph: {
     title: 'Blue Moon 5 Miler',
-    description: 'Run under the full moon at Prospect Park. May 31, 2026.',
+    description: 'Sunday, May 31st · Prospect Park · 8:00 PM Start',
     type: 'website',
   },
 };

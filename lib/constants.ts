@@ -2,16 +2,16 @@ import { RaceInfo } from '@/types';
 
 export const RACE_INFO: RaceInfo = {
   name: 'Blue Moon 5 Miler',
-  date: 'May 31, 2026',
-  time: '7:30 PM',
+  date: 'Sunday, May 31st',
+  time: '8:00 PM Start',
   distance: '5 Miles',
   location: 'Prospect Park, Brooklyn, NY',
-  price: 50,
+  price: 18,
   description:
-    'Run under the full moon at Prospect Park. A rare Blue Moon lights the way for Commonwealth Running Club\'s inaugural 5-mile race through one of Brooklyn\'s most beautiful parks.',
+    'A blue moon only comes around once every three years. We’re running it. Join us for a 5-mile night race in Prospect Park. No frills—just a solid course, good people, and a reason to get out there.',
 };
 
-export const RACE_DATE = new Date('2026-05-31T19:30:00-04:00');
+export const RACE_DATE = new Date('2026-05-31T20:00:00-04:00');
 
 export const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'] as const;
 

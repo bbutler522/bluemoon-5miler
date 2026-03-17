@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { Moon } from '@/components/Moon';
+import Image from 'next/image';
 import { Countdown } from '@/components/Countdown';
 import { MapPin, Calendar, Clock, Route, Users, Trophy } from 'lucide-react';
+import { RACE_INFO } from '@/lib/constants';
 
 export default function HomePage() {
   return (
@@ -12,28 +13,24 @@ export default function HomePage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gradient-radial from-lunar-300/8 via-midnight-700/5 to-transparent pointer-events-none" />
 
         <div className="relative z-10 max-w-3xl mx-auto text-center">
-          {/* Moon */}
-          <div className="mx-auto w-28 h-28 sm:w-36 sm:h-36 mb-10 animate-float">
-            <Moon />
+          {/* Logo */}
+          <div className="mx-auto w-[1000px] sm:w-[600px] mb-8">
+            <Image
+              src="/blue-moon-run-logo.png"
+              alt="Blue Moon 5 Miler logo"
+              width={1028}
+              height={1028}
+              priority
+              className="w-full h-auto"
+            />
           </div>
-
-          {/* Tag */}
-          <p className="inline-block text-[10px] sm:text-xs font-body font-semibold uppercase tracking-[0.3em] text-stardust/50 mb-6 border border-lunar-400/10 rounded-full px-4 py-1.5">
-            Commonwealth Running Club presents
-          </p>
-
-          {/* Title */}
-          <h1 className="font-display text-5xl sm:text-7xl lg:text-8xl text-moonlight leading-[0.95] mb-6">
-            Blue Moon
-            <br />
-            <span className="text-stardust/70">5 Miler</span>
-          </h1>
 
           {/* Subtitle */}
           <p className="font-body text-base sm:text-lg text-stardust/50 max-w-lg mx-auto leading-relaxed mb-4">
-            Run under the full moon at Prospect Park.
-            <br className="hidden sm:block" />
-            May 31, 2026 — Brooklyn, NY
+            {RACE_INFO.date} · Prospect Park · 8:00 PM Start
+          </p>
+          <p className="font-body text-sm text-stardust/50 max-w-xl mx-auto leading-relaxed">
+            A blue moon only comes around once every three years. We’re running it.
           </p>
 
           {/* Countdown */}
@@ -44,7 +41,7 @@ export default function HomePage() {
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/register" className="btn-primary">
-              Register Now — $50
+              Register Now — ${RACE_INFO.price}
             </Link>
             <Link href="/#about" className="btn-secondary">
               Learn More
@@ -60,21 +57,17 @@ export default function HomePage() {
             <div>
               <p className="label-field mb-4">About the Race</p>
               <h2 className="font-display text-3xl sm:text-4xl text-moonlight leading-tight mb-6">
-                A rare night under
-                <br />a rare moon.
+                No frills.
+                <br />
+                Just a solid run.
               </h2>
               <div className="space-y-4 text-sm text-stardust/60 leading-relaxed">
                 <p>
-                  On May 31st, 2026, a Blue Moon rises over Brooklyn. Commonwealth
-                  Running Club invites you to lace up for our inaugural 5-mile race
-                  through the winding roads of Prospect Park — starting at dusk,
-                  finishing under a full moon.
+                  Join us for a 5-mile night race in Prospect Park. No frills—just a
+                  solid course, good people, and a reason to get out there.
                 </p>
                 <p>
-                  This is a community event
-                  built by runners, for runners. We&apos;ve been building Commonwealth
-                  for three years in Brooklyn, and this is our first official race. We
-                  want it to feel special.
+                  Run it how you want. Just don’t miss it.
                 </p>
               </div>
             </div>
@@ -84,18 +77,18 @@ export default function HomePage() {
               {[
                 {
                   icon: Calendar,
-                  title: 'May 31, 2026',
-                  desc: 'Saturday evening — Blue Moon night',
+                  title: 'Sunday, May 31st',
+                  desc: 'Prospect Park · night race',
                 },
                 {
                   icon: Clock,
-                  title: '7:30 PM Start',
-                  desc: 'Check-in opens at 6:00 PM',
+                  title: '8:00 PM Start',
+                  desc: 'Arrive by 7:30 PM for check-in',
                 },
                 {
                   icon: Route,
                   title: '5 Miles',
-                  desc: 'One scenic loop through Prospect Park',
+                  desc: 'Format: self-timed',
                 },
                 {
                   icon: MapPin,
@@ -125,28 +118,28 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-moon-glow pointer-events-none" />
         <div className="max-w-4xl mx-auto relative z-10">
           <div className="text-center mb-16">
-            <p className="label-field mb-4">What You Get</p>
+            <p className="label-field mb-4">Race Details</p>
             <h2 className="font-display text-3xl sm:text-4xl text-moonlight leading-tight">
-              Race day details
+              Everything you need to know
             </h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
-                icon: '🏃',
-                title: 'Self Timed Race',
-                desc: 'Start your race with Strava at the start and end with us at the finish line!',
+                icon: '🕗',
+                title: 'Start + Check-in',
+                desc: 'Start Time: 8:00 PM. Check-in: arrive by 7:30 PM.',
               },
               {
-                icon: '👕',
-                title: 'Race Shirt',
-                desc: 'Custom Blue Moon 5 Miler tee. Available in XS–XXL.',
+                icon: '🗺️',
+                title: 'Course',
+                desc: 'Start location is marked on the course map (green dot).',
               },
               {
-                icon: '🍺',
-                title: 'Post-Race Party',
-                desc: 'Complimentary drinks, snacks, and community vibes after the race.',
+                icon: '⏱️',
+                title: 'Format',
+                desc: 'Self-timed. Run it how you want.',
               },
             ].map((item) => (
               <div key={item.title} className="card p-6">
@@ -169,17 +162,16 @@ export default function HomePage() {
           <div className="card p-10 sm:p-14 animate-pulse-glow">
             <p className="label-field mb-4">Registration</p>
             <h2 className="font-display text-4xl sm:text-5xl text-moonlight mb-3">
-              $50
+              $18
             </h2>
             <p className="text-sm text-stardust/50 mb-8">
-              Includes race entry, shirt, bib, post-race refreshments, and a night you
-              won&apos;t forget.
+              $18 standard entry. $15 if you completed the pre-survey (discount code sent via email).
             </p>
             <Link href="/register" className="btn-primary">
               Register Now
             </Link>
             <p className="text-xs text-stardust/30 mt-6">
-              Limited to ~200 runners. Early bird promo codes available.
+              Register by Sunday, May 3rd. Spots are limited.
             </p>
           </div>
         </div>
@@ -198,20 +190,20 @@ export default function HomePage() {
           <div className="space-y-6">
             {[
               {
-                q: 'Is the course flat?',
-                a: 'Prospect Park has gentle rolling hills. The course follows the main park drive loop — nothing extreme, but not pancake-flat either.',
+                q: 'How does the discount work?',
+                a: 'If you completed the pre-survey, you should have received a discount code by email. You can apply it during checkout on Stripe.',
               },
               {
-                q: 'Can I walk?',
-                a: 'Absolutely. All paces are welcome. Walk, jog, run — just come out and enjoy the moon.',
+                q: 'Is there a shirt?',
+                a: 'T-shirt pre-order is $22 (optional) and available during registration.',
               },
               {
-                q: 'What about parking?',
-                a: 'Street parking is available around Prospect Park. We recommend taking the subway (B/Q to Prospect Park, or 2/3 to Grand Army Plaza).',
+                q: 'What’s at the finish?',
+                a: 'We’ll have Blue Moon’s new non-alcoholic beer line at the finish. Hang out, cool down, and stick around.',
               },
               {
-                q: 'Are refunds available?',
-                a: 'Full refunds are available up to 14 days before race day. After that, registrations can be transferred to another runner.',
+                q: 'Is it chip-timed?',
+                a: 'No — the race is self-timed.',
               },
             ].map((item) => (
               <div key={item.q} className="card px-6 py-5">

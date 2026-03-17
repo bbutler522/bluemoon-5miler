@@ -200,24 +200,24 @@ export default async function DashboardPage() {
               <div className="space-y-4">
                 {[
                   {
-                    time: '6:00 PM',
-                    title: 'Check-in opens',
-                    desc: 'Head to the Prospect Park Bandshell area. Bring a valid photo ID for bib pickup.',
-                  },
-                  {
-                    time: '7:15 PM',
-                    title: 'Line up',
-                    desc: 'Find your pace group and get to the start line. Wear your bib on the front.',
-                  },
-                  {
                     time: '7:30 PM',
+                    title: 'Arrive + check in',
+                    desc: 'Arrive by 7:30 PM. Start location is marked on the course map (green dot).',
+                  },
+                  {
+                    time: '7:55 PM',
+                    title: 'Line up',
+                    desc: 'Get to the start and get ready. The race is self-timed.',
+                  },
+                  {
+                    time: '8:00 PM',
                     title: 'Race starts',
                     desc: "The gun goes off and you're running under the Blue Moon. Enjoy every mile.",
                   },
                   {
-                    time: '~8:30 PM',
-                    title: 'Post-race party',
-                    desc: 'Stick around for drinks, snacks, and community at the finish area.',
+                    time: '~9:00 PM',
+                    title: 'Post-race hang',
+                    desc: 'We’ll have Blue Moon’s new non-alcoholic beer line at the finish. Hang out, cool down, and stick around.',
                   },
                 ].map((item, i) => (
                   <div key={i} className="flex gap-4">
