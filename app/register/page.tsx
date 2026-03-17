@@ -4,11 +4,14 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import { Moon } from '@/components/Moon';
+import MagicLinkForm from '@/components/MagicLinkForm';
 import { RACE_INFO } from '@/lib/constants';
 import { SHIRT_SIZES, GENDER_OPTIONS } from '@/lib/constants';
-import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle2 } from 'lucide-react';
 
 const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
+const DRAFT_KEY = 'blue-moon-race:register-draft:v1';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -18,6 +21,7 @@ export default function RegisterPage() {
   const [step, setStep] = useState<'form' | 'payment' | 'success'>('form');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [authEmailHint, setAuthEmailHint] = useState<string>('');
 
   // Form fields
   const [firstName, setFirstName] = useState('');
@@ -31,21 +35,60 @@ export default function RegisterPage() {
   const [shirtSize, setShirtSize] = useState('');
 
   useEffect(() => {
+    // Restore draft form fields (so users don't lose progress if they leave to open the email)
+    try {
+      const raw = window.localStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const draft = JSON.parse(raw);
+        if (typeof draft?.firstName === 'string') setFirstName(draft.firstName);
+        if (typeof draft?.lastName === 'string') setLastName(draft.lastName);
+        if (typeof draft?.email === 'string') setEmail(draft.email);
+        if (typeof draft?.phone === 'string') setPhone(draft.phone);
+        if (typeof draft?.emergencyName === 'string') setEmergencyName(draft.emergencyName);
+        if (typeof draft?.emergencyPhone === 'string') setEmergencyPhone(draft.emergencyPhone);
+        if (typeof draft?.dob === 'string') setDob(draft.dob);
+        if (typeof draft?.gender === 'string') setGender(draft.gender);
+        if (typeof draft?.shirtSize === 'string') setShirtSize(draft.shirtSize);
+      }
+    } catch {
+      // ignore draft parsing errors
+    }
+
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
         setUser(data.user);
-        setEmail(data.user.email || '');
+        if (data.user.email) setEmail(data.user.email);
         const meta = data.user.user_metadata;
         if (meta?.full_name) {
           const parts = meta.full_name.split(' ');
           setFirstName(parts[0] || '');
           setLastName(parts.slice(1).join(' ') || '');
         }
-      } else {
-        router.push('/login?redirect=/register');
       }
     });
   }, []);
+
+  // Persist draft whenever fields change
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        DRAFT_KEY,
+        JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          phone,
+          emergencyName,
+          emergencyPhone,
+          dob,
+          gender,
+          shirtSize,
+        })
+      );
+    } catch {
+      // ignore quota / privacy mode errors
+    }
+  }, [firstName, lastName, email, phone, emergencyName, emergencyPhone, dob, gender, shirtSize]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -53,7 +96,7 @@ export default function RegisterPage() {
     setError('');
 
     if (!user) {
-      router.push(`/login?redirect=/register`);
+      setError('Please confirm your email to continue.');
       return;
     }
 
@@ -79,12 +122,14 @@ export default function RegisterPage() {
 
       // Demo mode — redirect directly to dashboard
       if (data.demo && data.redirect) {
+        try { window.localStorage.removeItem(DRAFT_KEY); } catch {}
         router.push(data.redirect);
         return;
       }
 
       // Live mode — redirect to Stripe Payment Link
       if (data.checkout_url) {
+        try { window.localStorage.removeItem(DRAFT_KEY); } catch {}
         window.location.href = data.checkout_url;
       } else {
         setStep('success');
@@ -119,6 +164,42 @@ export default function RegisterPage() {
     );
   }
 
+  // If not authenticated yet, keep everything on this page:
+  // show the email confirmation step + (optional) a disabled preview of the form state.
+  if (!user) {
+    return (
+      <section className="min-h-screen px-6 pt-24 pb-20">
+        <div className="max-w-xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-10">
+            <div className="mx-auto w-14 h-14 mb-6">
+              <Moon />
+            </div>
+            <h1 className="font-display text-3xl sm:text-4xl text-moonlight mb-2">
+              Register
+            </h1>
+            <p className="text-sm text-stardust/50">
+              Blue Moon 5 Miler — {RACE_INFO.date}
+            </p>
+          </div>
+
+          <div className="card p-6">
+            <MagicLinkForm
+              redirectTo="/register"
+              initialEmail={authEmailHint || email}
+              subtitle="Enter your email to get a magic link. After you click it, you'll come right back here to complete your registration."
+              onSent={(sentEmail) => setAuthEmailHint(sentEmail)}
+            />
+          </div>
+
+          <p className="text-[11px] text-stardust/30 text-center mt-4">
+            Tip: you can leave this tab open — your form progress will be saved on this device.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="min-h-screen px-6 pt-24 pb-20">
       <div className="max-w-xl mx-auto">
@@ -134,28 +215,6 @@ export default function RegisterPage() {
             Blue Moon 5 Miler — {RACE_INFO.date}
           </p>
         </div>
-
-        {/* Auth notice */}
-        {!user && (
-          <div className="card p-5 mb-8 flex items-start gap-3">
-            <AlertCircle size={18} className="text-stardust/60 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="text-sm text-moonlight font-semibold mb-1">
-                Sign in required
-              </p>
-              <p className="text-xs text-stardust/50">
-                You&apos;ll need an account to register.{' '}
-                <button
-                  onClick={() => router.push('/login?redirect=/register')}
-                  className="text-moonlight underline"
-                >
-                  Sign in or create one
-                </button>
-                .
-              </p>
-            </div>
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal info */}
@@ -306,7 +365,7 @@ export default function RegisterPage() {
           {/* Submit */}
           <button
             type="submit"
-            disabled={loading || !user}
+            disabled={loading}
             className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
