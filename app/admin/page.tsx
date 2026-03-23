@@ -177,7 +177,7 @@ export default function AdminOverview() {
                   const pct = total > 0 ? (count / total) * 100 : 0;
                   return (
                     <div key={size} className="flex items-center gap-3">
-                      <span className="text-xs text-stardust/50 w-20 font-mono">
+                      <span className="text-xs text-stardust/80 w-20 font-mono">
                         {size}
                       </span>
                       <div className="flex-1 h-2 bg-midnight-900/60 rounded-full overflow-hidden">

@@ -115,6 +115,68 @@
     from { transform: translateY(0); }
     to { transform: translateY(-200px); }
   }
+
+  /* Logo treatments */
+  .logo-glow {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .logo-glow::before {
+    content: '';
+    position: absolute;
+    inset: -14%;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      circle at 50% 50%,
+      rgba(200, 208, 235, 0.16) 0%,
+      rgba(74, 108, 247, 0.06) 35%,
+      transparent 65%
+    );
+    filter: blur(16px);
+    opacity: 0.65;
+    transform: scale(0.98);
+    animation: logoHaloPulse 4s ease-in-out infinite;
+  }
+
+  @media (max-width: 640px) {
+    .logo-glow::before {
+      inset: -10%;
+    }
+  }
+
+  .logo-stroke {
+    position: relative;
+    z-index: 1;
+    /*
+      "Solid" outline around alpha edges:
+      Use zero-blur drop-shadows offset in many directions to mimic a stroke.
+    */
+    filter:
+      /* 1px ring */
+      drop-shadow(.5px 0 0 rgba(255, 255, 255, 1))
+      drop-shadow(-.5px 0 0 rgba(255, 255, 255, 1))
+      drop-shadow(0 1px 0 rgba(255, 255, 255, 1))
+      drop-shadow(0 -.5px 0 rgba(255, 255, 255, 1))
+      drop-shadow(.5px .5px 0 rgba(255, 255, 255, 1))
+      drop-shadow(.5px -.5px 0 rgba(255, 255, 255, 1))
+      drop-shadow(-.5px .5px 0 rgba(255, 255, 255, 1))
+      drop-shadow(-.5px -.5px 0 rgba(255, 255, 255, 1));
+  }
+
+  @keyframes logoHaloPulse {
+    0%, 100% {
+      opacity: 0.55;
+      transform: scale(0.96);
+    }
+    50% {
+      opacity: 0.75;
+      transform: scale(1.02);
+    }
+  }
+
+  /* glow pulse is handled by .logo-glow::before */
 }
 
 /* Custom scrollbar */

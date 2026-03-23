@@ -61,7 +61,7 @@ export default function MagicLinkForm({
       <h2 className="font-display text-2xl text-moonlight text-center mb-1">
         {title}
       </h2>
-      <p className="text-xs text-stardust/40 text-center mb-6">{subtitle}</p>
+      <p className="text-xs text-stardust/80 text-center mb-6">{subtitle}</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

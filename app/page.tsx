@@ -14,22 +14,22 @@ export default function HomePage() {
 
         <div className="relative z-10 max-w-3xl mx-auto text-center">
           {/* Logo */}
-          <div className="mx-auto w-[1000px] sm:w-[600px] mb-8">
+          <div className="mx-auto w-full max-w-[1000px] sm:max-w-[600px] mb-8 logo-glow">
             <Image
               src="/blue-moon-run-logo.png"
               alt="Blue Moon 5 Miler logo"
               width={1028}
               height={1028}
               priority
-              className="w-full h-auto"
+              className="w-full h-auto logo-stroke"
             />
           </div>
 
           {/* Subtitle */}
-          <p className="font-body text-base sm:text-lg text-stardust/50 max-w-lg mx-auto leading-relaxed mb-4">
+          <p className="font-body text-base sm:text-lg text-stardust/80 max-w-lg mx-auto leading-relaxed mb-4">
             {RACE_INFO.date} · Prospect Park · 8:00 PM Start
           </p>
-          <p className="font-body text-sm text-stardust/50 max-w-xl mx-auto leading-relaxed">
+          <p className="font-body text-sm text-stardust/80 max-w-xl mx-auto leading-relaxed">
             A blue moon only comes around once every three years. We’re running it.
           </p>
 
@@ -61,7 +61,7 @@ export default function HomePage() {
                 <br />
                 Just a solid run.
               </h2>
-              <div className="space-y-4 text-sm text-stardust/60 leading-relaxed">
+              <div className="space-y-4 text-sm text-stardust/80 leading-relaxed">
                 <p>
                   Join us for a 5-mile night race in Prospect Park. No frills—just a
                   solid course, good people, and a reason to get out there.
@@ -98,7 +98,7 @@ export default function HomePage() {
               ].map((item) => (
                 <div key={item.title} className="card px-6 py-5 flex items-start gap-4">
                   <div className="mt-0.5 w-9 h-9 rounded-lg bg-midnight-800/80 border border-lunar-400/10 flex items-center justify-center flex-shrink-0">
-                    <item.icon size={16} className="text-stardust/60" />
+                    <item.icon size={16} className="text-stardust/80" />
                   </div>
                   <div>
                     <p className="text-sm font-body font-semibold text-moonlight">
@@ -147,7 +147,7 @@ export default function HomePage() {
                 <p className="text-sm font-body font-semibold text-moonlight mb-2">
                   {item.title}
                 </p>
-                <p className="text-xs text-stardust/50 leading-relaxed">
+                <p className="text-xs text-stardust/80 leading-relaxed">
                   {item.desc}
                 </p>
               </div>
@@ -164,7 +164,7 @@ export default function HomePage() {
             <h2 className="font-display text-4xl sm:text-5xl text-moonlight mb-3">
               $18
             </h2>
-            <p className="text-sm text-stardust/50 mb-8">
+            <p className="text-sm text-stardust/80 mb-8">
               $18 standard entry. $15 if you completed the pre-survey (discount code sent via email).
             </p>
             <Link href="/register" className="btn-primary">
@@ -210,7 +210,7 @@ export default function HomePage() {
                 <p className="text-sm font-body font-semibold text-moonlight mb-2">
                   {item.q}
                 </p>
-                <p className="text-xs text-stardust/50 leading-relaxed">
+                <p className="text-xs text-stardust/80 leading-relaxed">
                   {item.a}
                 </p>
               </div>

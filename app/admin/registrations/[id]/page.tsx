@@ -27,7 +27,7 @@ const statusStyles: Record<string, { icon: typeof CheckCircle2; color: string; b
   completed: { icon: CheckCircle2, color: 'text-green-400', bg: 'bg-green-400/10 border-green-400/20', label: 'Confirmed' },
   pending: { icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-400/10 border-yellow-400/20', label: 'Pending' },
   failed: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-400/10 border-red-400/20', label: 'Failed' },
-  refunded: { icon: XCircle, color: 'text-stardust/50', bg: 'bg-stardust/5 border-stardust/10', label: 'Refunded' },
+  refunded: { icon: XCircle, color: 'text-stardust/80', bg: 'bg-stardust/5 border-stardust/10', label: 'Refunded' },
 };
 
 export default function AdminRegistrationDetail() {
@@ -143,7 +143,7 @@ export default function AdminRegistrationDetail() {
           Registrations
         </Link>
         <span>/</span>
-        <span className="text-stardust/60">{reg.first_name} {reg.last_name}</span>
+        <span className="text-stardust/80">{reg.first_name} {reg.last_name}</span>
       </div>
 
       {/* Header with status */}
@@ -255,18 +255,18 @@ export default function AdminRegistrationDetail() {
                 className="input-field"
               />
             ) : (
-              <p className="text-sm text-stardust/60">{reg.phone || '—'}</p>
+              <p className="text-sm text-stardust/80">{reg.phone || '—'}</p>
             )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="label-field">Gender</label>
-              <p className="text-sm text-stardust/60">{reg.gender || '—'}</p>
+              <p className="text-sm text-stardust/80">{reg.gender || '—'}</p>
             </div>
             <div>
               <label className="label-field">Date of Birth</label>
-              <p className="text-sm text-stardust/60">{reg.date_of_birth || '—'}</p>
+              <p className="text-sm text-stardust/80">{reg.date_of_birth || '—'}</p>
             </div>
           </div>
         </div>
@@ -333,7 +333,7 @@ export default function AdminRegistrationDetail() {
                   ))}
                 </select>
               ) : (
-                <p className="text-sm text-stardust/60">{reg.shirt_size || '—'}</p>
+                <p className="text-sm text-stardust/80">{reg.shirt_size || '—'}</p>
               )}
             </div>
           </div>
@@ -361,7 +361,7 @@ export default function AdminRegistrationDetail() {
                   className="input-field"
                 />
               ) : (
-                <p className="text-sm text-stardust/60">{reg.emergency_contact_name || '—'}</p>
+                <p className="text-sm text-stardust/80">{reg.emergency_contact_name || '—'}</p>
               )}
             </div>
             <div>
@@ -373,7 +373,7 @@ export default function AdminRegistrationDetail() {
                   className="input-field"
                 />
               ) : (
-                <p className="text-sm text-stardust/60">{reg.emergency_contact_phone || '—'}</p>
+                <p className="text-sm text-stardust/80">{reg.emergency_contact_phone || '—'}</p>
               )}
             </div>
           </div>
@@ -388,7 +388,7 @@ export default function AdminRegistrationDetail() {
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full bg-stardust/20" />
               <div>
-                <p className="text-xs text-stardust/60">Registered</p>
+                <p className="text-xs text-stardust/80">Registered</p>
                 <p className="text-xs text-stardust/30">
                   {new Date(reg.created_at).toLocaleString('en-US', {
                     weekday: 'short',
@@ -404,7 +404,7 @@ export default function AdminRegistrationDetail() {
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full bg-stardust/20" />
               <div>
-                <p className="text-xs text-stardust/60">Last Updated</p>
+                <p className="text-xs text-stardust/80">Last Updated</p>
                 <p className="text-xs text-stardust/30">
                   {new Date(reg.updated_at).toLocaleString('en-US', {
                     weekday: 'short',
@@ -420,7 +420,7 @@ export default function AdminRegistrationDetail() {
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full bg-stardust/20" />
               <div>
-                <p className="text-xs text-stardust/60">Registration ID</p>
+                <p className="text-xs text-stardust/80">Registration ID</p>
                 <p className="text-[10px] font-mono text-stardust/20 break-all">{reg.id}</p>
               </div>
             </div>

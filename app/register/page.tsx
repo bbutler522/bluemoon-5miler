@@ -149,7 +149,7 @@ export default function RegisterPage() {
           <h1 className="font-display text-3xl text-moonlight mb-3">
             You&apos;re in!
           </h1>
-          <p className="text-sm text-stardust/50 mb-8">
+          <p className="text-sm text-stardust/80 mb-8">
             Your registration is confirmed. Check your email for details and head
             to your dashboard to see your race info.
           </p>
@@ -178,7 +178,7 @@ export default function RegisterPage() {
             <h1 className="font-display text-3xl sm:text-4xl text-moonlight mb-2">
               Register
             </h1>
-            <p className="text-sm text-stardust/50">
+            <p className="text-sm text-stardust/80">
               Blue Moon 5 Miler — {RACE_INFO.date}
             </p>
           </div>
@@ -211,7 +211,7 @@ export default function RegisterPage() {
           <h1 className="font-display text-3xl sm:text-4xl text-moonlight mb-2">
             Register
           </h1>
-          <p className="text-sm text-stardust/50">
+          <p className="text-sm text-stardust/80">
             Blue Moon 5 Miler — {RACE_INFO.date}
           </p>
         </div>
@@ -342,7 +342,7 @@ export default function RegisterPage() {
           {/* Price summary */}
           <div className="card p-5">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-stardust/60">Race entry</span>
+              <span className="text-sm text-stardust/80">Race entry</span>
               <span className="text-sm text-moonlight">
                 ${RACE_INFO.price.toFixed(2)}
               </span>

@@ -46,7 +46,6 @@ export function Navigation() {
   const publicLinks = [
     { href: '/#about', label: 'About' },
     { href: '/#details', label: 'Details' },
-    { href: '/register', label: 'Register' },
   ];
 
   return (
@@ -63,7 +62,7 @@ export function Navigation() {
           href="/"
           className="font-display text-lg text-moonlight tracking-wide hover:text-white transition-colors"
         >
-          <span className="text-stardust/60 text-sm mr-1">☾</span>{' '}
+          <span className="text-stardust/80 text-sm mr-1">☾</span>{' '}
           Commonwealth
         </Link>
 
@@ -108,15 +107,20 @@ export function Navigation() {
 
               <button
                 onClick={handleSignOut}
-                className="text-sm font-body text-stardust/50 hover:text-moonlight tracking-wide uppercase transition-colors duration-200"
+                className="text-sm font-body text-stardust/80 hover:text-moonlight tracking-wide uppercase transition-colors duration-200"
               >
                 Sign out
               </button>
             </div>
           ) : (
-            <Link href="/login" className="btn-primary !py-2 !px-5 !text-xs">
-              Sign In
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link href="/register" className="btn-primary !py-2 !px-5 !text-xs">
+                Register
+              </Link>
+              <Link href="/login" className="btn-secondary !py-2 !px-5 !text-xs">
+                Sign In
+              </Link>
+            </div>
           )}
         </div>
 
@@ -161,15 +165,20 @@ export function Navigation() {
               )}
               <button
                 onClick={handleSignOut}
-                className="block text-sm font-body text-stardust/50 hover:text-moonlight tracking-wide uppercase transition-colors"
+                className="block text-sm font-body text-stardust/80 hover:text-moonlight tracking-wide uppercase transition-colors"
               >
                 Sign out
               </button>
             </>
           ) : (
-            <Link href="/login" className="btn-primary !py-2 !px-5 !text-xs inline-block">
-              Sign In
-            </Link>
+            <div className="pt-2 flex flex-col gap-3">
+              <Link href="/register" className="btn-primary !py-2 !px-5 !text-xs text-center">
+                Register
+              </Link>
+              <Link href="/login" className="btn-secondary !py-2 !px-5 !text-xs text-center">
+                Sign In
+              </Link>
+            </div>
           )}
         </div>
       )}

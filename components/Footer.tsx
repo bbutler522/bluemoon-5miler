@@ -8,10 +8,10 @@ export function Footer() {
           {/* Brand */}
           <div>
             <p className="font-display text-xl text-moonlight mb-3">
-              <span className="text-stardust/50 text-sm mr-1">☾</span>{' '}
+              <span className="text-stardust/80 text-sm mr-1">☾</span>{' '}
               Commonwealth
             </p>
-            <p className="text-sm text-stardust/50 leading-relaxed max-w-xs">
+            <p className="text-sm text-stardust/80 leading-relaxed max-w-xs">
               Brooklyn&apos;s community running club. Est. 2023.
             </p>
           </div>
@@ -22,19 +22,19 @@ export function Footer() {
             <div className="space-y-2">
               <Link
                 href="/#about"
-                className="block text-sm text-stardust/60 hover:text-moonlight transition-colors"
+                className="block text-sm text-stardust/80 hover:text-moonlight transition-colors"
               >
                 About the Race
               </Link>
               <Link
                 href="/#details"
-                className="block text-sm text-stardust/60 hover:text-moonlight transition-colors"
+                className="block text-sm text-stardust/80 hover:text-moonlight transition-colors"
               >
                 Race Details
               </Link>
               <Link
                 href="/register"
-                className="block text-sm text-stardust/60 hover:text-moonlight transition-colors"
+                className="block text-sm text-stardust/80 hover:text-moonlight transition-colors"
               >
                 Register
               </Link>
@@ -49,13 +49,13 @@ export function Footer() {
                 href="https://instagram.com/commonwealthrunclub"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block text-sm text-stardust/60 hover:text-moonlight transition-colors"
+                className="block text-sm text-stardust/80 hover:text-moonlight transition-colors"
               >
                 Instagram
               </a>
               <a
                 href="mailto:race@commonwealthrunclub.com"
-                className="block text-sm text-stardust/60 hover:text-moonlight transition-colors"
+                className="block text-sm text-stardust/80 hover:text-moonlight transition-colors"
               >
                 race@commonwealthrunclub.com
               </a>

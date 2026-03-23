@@ -61,7 +61,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
                       isActive
                         ? 'bg-midnight-800/80 text-moonlight border border-lunar-400/15'
-                        : 'text-stardust/50 hover:text-moonlight hover:bg-midnight-900/40'
+                        : 'text-stardust/80 hover:text-moonlight hover:bg-midnight-900/40'
                     }`}
                   >
                     <item.icon size={16} />

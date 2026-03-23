@@ -19,7 +19,7 @@ const statusStyles: Record<string, { icon: typeof CheckCircle2; color: string; b
   completed: { icon: CheckCircle2, color: 'text-green-400', bg: 'bg-green-400/10' },
   pending: { icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
   failed: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-400/10' },
-  refunded: { icon: XCircle, color: 'text-stardust/50', bg: 'bg-stardust/5' },
+  refunded: { icon: XCircle, color: 'text-stardust/80', bg: 'bg-stardust/5' },
 };
 
 export default function AdminRegistrations() {
@@ -160,7 +160,7 @@ export default function AdminRegistrations() {
                     <span className="flex items-center gap-1">
                       {col.label}
                       {col.key && sort === col.key && (
-                        <ArrowUpDown size={10} className="text-stardust/50" />
+                        <ArrowUpDown size={10} className="text-stardust/80" />
                       )}
                     </span>
                   </th>
@@ -196,13 +196,13 @@ export default function AdminRegistrations() {
                       key={reg.id}
                       className="border-b border-lunar-400/5 hover:bg-midnight-900/30 transition-colors"
                     >
-                      <td className="px-4 py-3 font-mono text-stardust/50">
+                      <td className="px-4 py-3 font-mono text-stardust/80">
                         {reg.bib_number ? `#${reg.bib_number}` : '—'}
                       </td>
                       <td className="px-4 py-3 text-moonlight font-medium whitespace-nowrap">
                         {reg.first_name} {reg.last_name}
                       </td>
-                      <td className="px-4 py-3 text-stardust/50">{reg.email}</td>
+                      <td className="px-4 py-3 text-stardust/80">{reg.email}</td>
                       <td className="px-4 py-3">
                         <span
                           className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-md ${st.bg} ${st.color}`}
@@ -211,10 +211,10 @@ export default function AdminRegistrations() {
                           {reg.payment_status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 font-mono text-stardust/60">
+                      <td className="px-4 py-3 font-mono text-stardust/80">
                         ${Number(reg.amount_paid).toFixed(2)}
                       </td>
-                      <td className="px-4 py-3 text-stardust/50">
+                      <td className="px-4 py-3 text-stardust/80">
                         {reg.shirt_size || '—'}
                       </td>
                       <td className="px-4 py-3 text-stardust/40 whitespace-nowrap">
