@@ -153,6 +153,42 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+
+          {/* Course map */}
+          <div className="mt-10 card overflow-hidden">
+            <div className="px-6 pt-6 pb-4 flex items-start justify-between gap-6">
+              <div>
+                <p className="label-field mb-2">Course Map</p>
+                <p className="text-sm text-stardust/80">
+                  The full 5-mile loop in Prospect Park.
+                </p>
+              </div>
+              <a
+                href="/blue-moon-5-miler-route.png"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-stardust/60 hover:text-moonlight transition-colors whitespace-nowrap mt-1"
+              >
+                Open full size →
+              </a>
+            </div>
+            <div className="px-4 pb-6">
+              <a
+                href="/blue-moon-5-miler-route.png"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block rounded-xl overflow-hidden border border-lunar-400/10 bg-midnight-950/40"
+              >
+                <Image
+                  src="/blue-moon-5-miler-route.png"
+                  alt="Blue Moon 5 Miler course map around Prospect Park"
+                  width={1664}
+                  height={2048}
+                  className="w-full h-auto max-h-[500px] object-contain object-top"
+                />
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 

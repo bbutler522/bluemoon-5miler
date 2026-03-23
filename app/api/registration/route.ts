@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase, createAdminSupabase } from '@/lib/supabase-server';
-import { PAYMENT_LINK_URL } from '@/lib/stripe';
+import { stripe } from '@/lib/stripe';
+import { RACE_INFO, SHIRT_PREORDER_PRICE, PROMO_DISCOUNT } from '@/lib/constants';
+
+const VALID_PROMO_CODE = process.env.PROMO_CODE || '';
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,6 +35,8 @@ export async function POST(request: NextRequest) {
       date_of_birth,
       gender,
       shirt_size,
+      shirt_preorder,
+      promo_code,
     } = body;
 
     if (!first_name || !last_name || !email) {
@@ -40,6 +45,23 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // If shirt is pre-ordered, a size is required
+    if (shirt_preorder && !shirt_size) {
+      return NextResponse.json(
+        { error: 'Please select a shirt size to add the pre-order.' },
+        { status: 400 }
+      );
+    }
+
+    // Validate promo code server-side
+    const promoValid =
+      VALID_PROMO_CODE.length > 0 &&
+      typeof promo_code === 'string' &&
+      promo_code.trim().toUpperCase() === VALID_PROMO_CODE.toUpperCase();
+    const entryPrice = promoValid
+      ? RACE_INFO.price - PROMO_DISCOUNT
+      : RACE_INFO.price;
 
     // Check for existing completed registration
     const { data: existingReg } = await admin
@@ -56,7 +78,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build registration data (no more promo code logic — Stripe handles it)
     const registrationData = {
       user_id: user.id,
       first_name,
@@ -67,7 +88,8 @@ export async function POST(request: NextRequest) {
       emergency_contact_phone: emergency_contact_phone || null,
       date_of_birth: date_of_birth || null,
       gender: gender || null,
-      shirt_size: shirt_size || null,
+      shirt_size: shirt_preorder ? (shirt_size || null) : null,
+      shirt_preorder: !!shirt_preorder,
       payment_status: 'pending',
     };
 
@@ -99,24 +121,73 @@ export async function POST(request: NextRequest) {
         .maybeSingle();
 
       const nextBib = (maxBib?.bib_number || 100) + 1;
+      const totalAmount = entryPrice + (shirt_preorder ? SHIRT_PREORDER_PRICE : 0);
 
       await admin
         .from('registrations')
         .update({
           payment_status: 'completed',
           bib_number: nextBib,
-          amount_paid: 50,
+          amount_paid: totalAmount,
         })
         .eq('id', registrationId);
 
       return NextResponse.json({ demo: true, redirect: '/dashboard?payment=success' });
     }
 
-    // === LIVE MODE — just return the Payment Link URL ===
-    // client_reference_id ties the Stripe payment back to our registration
-    const checkoutUrl = `${PAYMENT_LINK_URL}?client_reference_id=${registrationId}&prefilled_email=${encodeURIComponent(email)}`;
+    // === LIVE MODE — create a Stripe Checkout Session ===
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Payment processing is not configured.' },
+        { status: 500 }
+      );
+    }
 
-    return NextResponse.json({ checkout_url: checkoutUrl });
+    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || '';
+
+    const lineItems: any[] = [
+      {
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: 'Blue Moon 5 Miler — Race Entry',
+            description: `Sunday, May 31st · Prospect Park · 8:00 PM${promoValid ? ' (promo applied)' : ''}`,
+          },
+          unit_amount: Math.round(entryPrice * 100),
+        },
+        quantity: 1,
+      },
+    ];
+
+    if (shirt_preorder) {
+      lineItems.push({
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: 'Blue Moon 5 Miler — T-Shirt Pre-Order',
+            description: `Size: ${shirt_size}`,
+          },
+          unit_amount: Math.round(SHIRT_PREORDER_PRICE * 100),
+        },
+        quantity: 1,
+      });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      line_items: lineItems,
+      client_reference_id: registrationId,
+      customer_email: email,
+      success_url: `${origin}/dashboard?payment=success`,
+      cancel_url: `${origin}/register?cancelled=true`,
+      metadata: {
+        registration_id: registrationId,
+        shirt_preorder: shirt_preorder ? 'true' : 'false',
+        promo_applied: promoValid ? 'true' : 'false',
+      },
+    });
+
+    return NextResponse.json({ checkout_url: session.url });
   } catch (error: any) {
     console.error('Registration error:', error);
     return NextResponse.json(

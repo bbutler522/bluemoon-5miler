@@ -5,13 +5,12 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import { Moon } from '@/components/Moon';
 import MagicLinkForm from '@/components/MagicLinkForm';
-import { RACE_INFO } from '@/lib/constants';
-import { SHIRT_SIZES, GENDER_OPTIONS } from '@/lib/constants';
-import { Loader2, CheckCircle2 } from 'lucide-react';
+import { RACE_INFO, SHIRT_SIZES, GENDER_OPTIONS, SHIRT_PREORDER_PRICE, PROMO_DISCOUNT } from '@/lib/constants';
+import { Loader2, CheckCircle2, CheckCircle, XCircle, Tag } from 'lucide-react';
 
 const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
 
-const DRAFT_KEY = 'blue-moon-race:register-draft:v1';
+const DRAFT_KEY = 'blue-moon-race:register-draft:v2';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -32,10 +31,22 @@ export default function RegisterPage() {
   const [emergencyPhone, setEmergencyPhone] = useState('');
   const [dob, setDob] = useState('');
   const [gender, setGender] = useState('');
+
+  // Shirt pre-order
+  const [shirtPreorder, setShirtPreorder] = useState(false);
   const [shirtSize, setShirtSize] = useState('');
 
+  // Promo code
+  const [promoCode, setPromoCode] = useState('');
+  const [promoStatus, setPromoStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle');
+  const [promoDiscount, setPromoDiscount] = useState(0);
+
+  // Derived totals
+  const entryPrice = RACE_INFO.price - promoDiscount;
+  const shirtTotal = shirtPreorder ? SHIRT_PREORDER_PRICE : 0;
+  const total = entryPrice + shirtTotal;
+
   useEffect(() => {
-    // Restore draft form fields (so users don't lose progress if they leave to open the email)
     try {
       const raw = window.localStorage.getItem(DRAFT_KEY);
       if (raw) {
@@ -48,6 +59,7 @@ export default function RegisterPage() {
         if (typeof draft?.emergencyPhone === 'string') setEmergencyPhone(draft.emergencyPhone);
         if (typeof draft?.dob === 'string') setDob(draft.dob);
         if (typeof draft?.gender === 'string') setGender(draft.gender);
+        if (typeof draft?.shirtPreorder === 'boolean') setShirtPreorder(draft.shirtPreorder);
         if (typeof draft?.shirtSize === 'string') setShirtSize(draft.shirtSize);
       }
     } catch {
@@ -68,27 +80,55 @@ export default function RegisterPage() {
     });
   }, []);
 
-  // Persist draft whenever fields change
   useEffect(() => {
     try {
       window.localStorage.setItem(
         DRAFT_KEY,
         JSON.stringify({
-          firstName,
-          lastName,
-          email,
-          phone,
-          emergencyName,
-          emergencyPhone,
-          dob,
-          gender,
-          shirtSize,
+          firstName, lastName, email, phone,
+          emergencyName, emergencyPhone, dob, gender,
+          shirtPreorder, shirtSize,
         })
       );
     } catch {
       // ignore quota / privacy mode errors
     }
-  }, [firstName, lastName, email, phone, emergencyName, emergencyPhone, dob, gender, shirtSize]);
+  }, [firstName, lastName, email, phone, emergencyName, emergencyPhone, dob, gender, shirtPreorder, shirtSize]);
+
+  // Clear shirt size when pre-order is toggled off
+  useEffect(() => {
+    if (!shirtPreorder) setShirtSize('');
+  }, [shirtPreorder]);
+
+  async function handleApplyPromo() {
+    if (!promoCode.trim()) return;
+    setPromoStatus('checking');
+    try {
+      const res = await fetch('/api/validate-promo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: promoCode }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setPromoStatus('valid');
+        setPromoDiscount(data.discount);
+      } else {
+        setPromoStatus('invalid');
+        setPromoDiscount(0);
+      }
+    } catch {
+      setPromoStatus('invalid');
+      setPromoDiscount(0);
+    }
+  }
+
+  function handlePromoKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleApplyPromo();
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -97,6 +137,13 @@ export default function RegisterPage() {
 
     if (!user) {
       setError('Please confirm your email to continue.');
+      setLoading(false);
+      return;
+    }
+
+    if (shirtPreorder && !shirtSize) {
+      setError('Please select a shirt size to add the pre-order.');
+      setLoading(false);
       return;
     }
 
@@ -113,21 +160,21 @@ export default function RegisterPage() {
           emergency_contact_phone: emergencyPhone,
           date_of_birth: dob || null,
           gender: gender || null,
-          shirt_size: shirtSize || null,
+          shirt_size: shirtPreorder ? shirtSize : null,
+          shirt_preorder: shirtPreorder,
+          promo_code: promoStatus === 'valid' ? promoCode : '',
         }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Registration failed');
 
-      // Demo mode — redirect directly to dashboard
       if (data.demo && data.redirect) {
         try { window.localStorage.removeItem(DRAFT_KEY); } catch {}
         router.push(data.redirect);
         return;
       }
 
-      // Live mode — redirect to Stripe Payment Link
       if (data.checkout_url) {
         try { window.localStorage.removeItem(DRAFT_KEY); } catch {}
         window.location.href = data.checkout_url;
@@ -146,17 +193,11 @@ export default function RegisterPage() {
       <section className="min-h-screen flex items-center justify-center px-6 pt-16 pb-20">
         <div className="max-w-md text-center">
           <CheckCircle2 size={48} className="text-green-400 mx-auto mb-6" />
-          <h1 className="font-display text-3xl text-moonlight mb-3">
-            You&apos;re in!
-          </h1>
+          <h1 className="font-display text-3xl text-moonlight mb-3">You&apos;re in!</h1>
           <p className="text-sm text-stardust/80 mb-8">
-            Your registration is confirmed. Check your email for details and head
-            to your dashboard to see your race info.
+            Your registration is confirmed. Check your email for details and head to your dashboard.
           </p>
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="btn-primary"
-          >
+          <button onClick={() => router.push('/dashboard')} className="btn-primary">
             Go to Dashboard
           </button>
         </div>
@@ -164,25 +205,15 @@ export default function RegisterPage() {
     );
   }
 
-  // If not authenticated yet, keep everything on this page:
-  // show the email confirmation step + (optional) a disabled preview of the form state.
   if (!user) {
     return (
       <section className="min-h-screen px-6 pt-24 pb-20">
         <div className="max-w-xl mx-auto">
-          {/* Header */}
           <div className="text-center mb-10">
-            <div className="mx-auto w-14 h-14 mb-6">
-              <Moon />
-            </div>
-            <h1 className="font-display text-3xl sm:text-4xl text-moonlight mb-2">
-              Register
-            </h1>
-            <p className="text-sm text-stardust/80">
-              Blue Moon 5 Miler — {RACE_INFO.date}
-            </p>
+            <div className="mx-auto w-14 h-14 mb-6"><Moon /></div>
+            <h1 className="font-display text-3xl sm:text-4xl text-moonlight mb-2">Register</h1>
+            <p className="text-sm text-stardust/80">Blue Moon 5 Miler — {RACE_INFO.date}</p>
           </div>
-
           <div className="card p-6">
             <MagicLinkForm
               redirectTo="/register"
@@ -191,7 +222,6 @@ export default function RegisterPage() {
               onSent={(sentEmail) => setAuthEmailHint(sentEmail)}
             />
           </div>
-
           <p className="text-[11px] text-stardust/30 text-center mt-4">
             Tip: you can leave this tab open — your form progress will be saved on this device.
           </p>
@@ -203,17 +233,10 @@ export default function RegisterPage() {
   return (
     <section className="min-h-screen px-6 pt-24 pb-20">
       <div className="max-w-xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-10">
-          <div className="mx-auto w-14 h-14 mb-6">
-            <Moon />
-          </div>
-          <h1 className="font-display text-3xl sm:text-4xl text-moonlight mb-2">
-            Register
-          </h1>
-          <p className="text-sm text-stardust/80">
-            Blue Moon 5 Miler — {RACE_INFO.date}
-          </p>
+          <div className="mx-auto w-14 h-14 mb-6"><Moon /></div>
+          <h1 className="font-display text-3xl sm:text-4xl text-moonlight mb-2">Register</h1>
+          <p className="text-sm text-stardust/80">Blue Moon 5 Miler — {RACE_INFO.date}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -224,70 +247,35 @@ export default function RegisterPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="label-field">First Name *</label>
-                <input
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="input-field"
-                  required
-                />
+                <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="input-field" required />
               </div>
               <div>
                 <label className="label-field">Last Name *</label>
-                <input
-                  type="text"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="input-field"
-                  required
-                />
+                <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className="input-field" required />
               </div>
             </div>
 
             <div>
               <label className="label-field">Email *</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input-field"
-                required
-              />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" required />
             </div>
 
             <div>
               <label className="label-field">Phone</label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="input-field"
-                placeholder="(555) 555-5555"
-              />
+              <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="input-field" placeholder="(555) 555-5555" />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="label-field">Date of Birth</label>
-                <input
-                  type="date"
-                  value={dob}
-                  onChange={(e) => setDob(e.target.value)}
-                  className="input-field"
-                />
+                <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="input-field" />
               </div>
               <div>
                 <label className="label-field">Gender</label>
-                <select
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-                  className="input-field"
-                >
+                <select value={gender} onChange={(e) => setGender(e.target.value)} className="input-field">
                   <option value="">Select...</option>
                   {GENDER_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
                 </select>
               </div>
@@ -300,58 +288,126 @@ export default function RegisterPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="label-field">Contact Name</label>
-                <input
-                  type="text"
-                  value={emergencyName}
-                  onChange={(e) => setEmergencyName(e.target.value)}
-                  className="input-field"
-                />
+                <input type="text" value={emergencyName} onChange={(e) => setEmergencyName(e.target.value)} className="input-field" />
               </div>
               <div>
                 <label className="label-field">Contact Phone</label>
-                <input
-                  type="tel"
-                  value={emergencyPhone}
-                  onChange={(e) => setEmergencyPhone(e.target.value)}
-                  className="input-field"
-                />
+                <input type="tel" value={emergencyPhone} onChange={(e) => setEmergencyPhone(e.target.value)} className="input-field" />
               </div>
             </div>
           </fieldset>
 
-          {/* Race options */}
+          {/* Race options — T-shirt pre-order */}
           <fieldset className="space-y-4">
-            <legend className="label-field mb-2">Race Options</legend>
-            <div>
-              <label className="label-field">Shirt Size</label>
-              <select
-                value={shirtSize}
-                onChange={(e) => setShirtSize(e.target.value)}
-                className="input-field"
-              >
-                <option value="">Select size...</option>
-                {SHIRT_SIZES.map((size) => (
-                  <option key={size} value={size}>
-                    {size}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <legend className="label-field mb-2">Add-ons</legend>
+
+            {/* Shirt toggle card */}
+            <label className={`card px-5 py-4 flex items-start gap-4 cursor-pointer transition-colors ${shirtPreorder ? 'border-lunar-400/30 bg-midnight-800/60' : ''}`}>
+              <input
+                type="checkbox"
+                checked={shirtPreorder}
+                onChange={(e) => setShirtPreorder(e.target.checked)}
+                className="mt-1 accent-moonlight flex-shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-moonlight">T-Shirt Pre-Order</p>
+                  <span className="text-sm text-moonlight font-display">+${SHIRT_PREORDER_PRICE}</span>
+                </div>
+                <p className="text-xs text-stardust/60 mt-0.5">Optional — pick up at the race.</p>
+
+                {/* Size selector — slides in when checked */}
+                {shirtPreorder && (
+                  <div className="mt-3">
+                    <label className="label-field mb-1">Size *</label>
+                    <select
+                      value={shirtSize}
+                      onChange={(e) => setShirtSize(e.target.value)}
+                      className="input-field"
+                      required={shirtPreorder}
+                    >
+                      <option value="">Select size...</option>
+                      {SHIRT_SIZES.map((size) => (
+                        <option key={size} value={size}>{size}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+            </label>
           </fieldset>
 
-          {/* Price summary */}
-          <div className="card p-5">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-stardust/80">Race entry</span>
-              <span className="text-sm text-moonlight">
-                ${RACE_INFO.price.toFixed(2)}
-              </span>
+          {/* Price summary + promo code */}
+          <div className="card p-5 space-y-3">
+            {/* Race entry */}
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-stardust/80">Race entry</span>
+              <span className="text-moonlight">${RACE_INFO.price.toFixed(2)}</span>
             </div>
-            <div className="border-t border-lunar-400/10 mt-3 pt-3 flex justify-between items-center">
+
+            {/* Shirt add-on */}
+            {shirtPreorder && (
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-stardust/80">T-shirt pre-order{shirtSize ? ` (${shirtSize})` : ''}</span>
+                <span className="text-moonlight">+${SHIRT_PREORDER_PRICE.toFixed(2)}</span>
+              </div>
+            )}
+
+            {/* Promo code row */}
+            <div className="pt-1">
+              <label className="label-field mb-1.5 flex items-center gap-1.5">
+                <Tag size={11} />
+                Promo code
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={promoCode}
+                  onChange={(e) => {
+                    setPromoCode(e.target.value);
+                    if (promoStatus !== 'idle') {
+                      setPromoStatus('idle');
+                      setPromoDiscount(0);
+                    }
+                  }}
+                  onKeyDown={handlePromoKeyDown}
+                  className="input-field flex-1"
+                  placeholder="Enter code"
+                />
+                <button
+                  type="button"
+                  onClick={handleApplyPromo}
+                  disabled={!promoCode.trim() || promoStatus === 'checking'}
+                  className="btn-secondary px-4 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {promoStatus === 'checking' ? <Loader2 size={14} className="animate-spin" /> : 'Apply'}
+                </button>
+              </div>
+
+              {promoStatus === 'valid' && (
+                <p className="mt-1.5 text-xs text-green-400 flex items-center gap-1.5">
+                  <CheckCircle size={12} /> Code applied — ${promoDiscount.toFixed(2)} off
+                </p>
+              )}
+              {promoStatus === 'invalid' && (
+                <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1.5">
+                  <XCircle size={12} /> Invalid promo code
+                </p>
+              )}
+            </div>
+
+            {/* Promo discount line */}
+            {promoStatus === 'valid' && promoDiscount > 0 && (
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-green-400/80">Promo discount</span>
+                <span className="text-green-400">−${promoDiscount.toFixed(2)}</span>
+              </div>
+            )}
+
+            {/* Total */}
+            <div className="border-t border-lunar-400/10 pt-3 flex justify-between items-center">
               <span className="text-sm font-semibold text-moonlight">Total</span>
-              <span className="font-display text-xl text-moonlight">
-                ${RACE_INFO.price.toFixed(2)}
-              </span>
+              <span className="font-display text-xl text-moonlight">${total.toFixed(2)}</span>
             </div>
           </div>
 
@@ -374,9 +430,9 @@ export default function RegisterPage() {
                 Processing...
               </>
             ) : isDemoMode ? (
-              `Register (Demo) — $${RACE_INFO.price.toFixed(2)}`
+              `Register (Demo) — $${total.toFixed(2)}`
             ) : (
-              `Pay $${RACE_INFO.price.toFixed(2)} & Register`
+              `Pay $${total.toFixed(2)} & Register`
             )}
           </button>
 

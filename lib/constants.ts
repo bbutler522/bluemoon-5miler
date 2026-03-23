@@ -13,6 +13,13 @@ export const RACE_INFO: RaceInfo = {
 
 export const RACE_DATE = new Date('2026-05-31T20:00:00-04:00');
 
+// Add-ons
+export const SHIRT_PREORDER_PRICE = 22;
+
+// Promo code discount — $3 off standard entry ($18 → $15).
+// The actual promo code string lives in PROMO_CODE env var (server-side only).
+export const PROMO_DISCOUNT = 3;
+
 export const SHIRT_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'] as const;
 
 export const GENDER_OPTIONS = [

@@ -62,8 +62,7 @@ export function Navigation() {
           href="/"
           className="font-display text-lg text-moonlight tracking-wide hover:text-white transition-colors"
         >
-          <span className="text-stardust/80 text-sm mr-1">☾</span>{' '}
-          Commonwealth
+          Blue Moon 5 Miler - Commonwealth Running
         </Link>
 
         {/* Desktop nav */}

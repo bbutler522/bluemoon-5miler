@@ -16,6 +16,7 @@ CREATE TABLE registrations (
   date_of_birth DATE,
   gender TEXT,
   shirt_size TEXT,
+  shirt_preorder BOOLEAN DEFAULT FALSE,
   bib_number INTEGER UNIQUE,
   payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded')),
   amount_paid NUMERIC(10,2),
@@ -65,3 +66,9 @@ CREATE POLICY "Users can update own pending registrations"
   USING (auth.uid() = user_id AND payment_status = 'pending');
 
 -- Service role bypasses RLS (used by webhooks and admin API routes)
+
+-- ============================================
+-- Migration: add shirt_preorder column
+-- Run this if you already have the table created:
+--   ALTER TABLE registrations ADD COLUMN IF NOT EXISTS shirt_preorder BOOLEAN DEFAULT FALSE;
+-- ============================================
