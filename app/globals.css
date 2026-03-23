@@ -130,12 +130,12 @@
     pointer-events: none;
     background: radial-gradient(
       circle at 50% 50%,
-      rgba(200, 208, 235, 0.16) 0%,
-      rgba(74, 108, 247, 0.06) 35%,
-      transparent 65%
+      rgba(200, 208, 235, 0.16) 40%,
+      rgba(74, 108, 247, 0.06) 50%,
+      transparent 75%
     );
     filter: blur(16px);
-    opacity: 0.65;
+    opacity: 0.95;
     transform: scale(0.98);
     animation: logoHaloPulse 4s ease-in-out infinite;
   }

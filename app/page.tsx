@@ -21,7 +21,7 @@ export default function HomePage() {
               width={1028}
               height={1028}
               priority
-              className="w-full h-auto logo-stroke"
+              className="w-full h-auto logo-stroke logo-glow"
             />
           </div>
 
