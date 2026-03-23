@@ -3,6 +3,7 @@
 const ADMIN_EMAILS: string[] = [
   // Add your email(s) here (must match the email you use to sign in):
   'bbutler522@gmail.com',
+  'jazzelinger@gmail.com',
 ];
 
 export function isAdmin(email: string | undefined): boolean {
