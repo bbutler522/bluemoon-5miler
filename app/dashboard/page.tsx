@@ -42,7 +42,7 @@ const statusConfig = {
   refunded: {
     icon: XCircle,
     label: 'Refunded',
-    color: 'text-stardust/80',
+    color: 'text-stardust/100',
     bg: 'bg-stardust/5 border-stardust/10',
     desc: 'Your registration has been refunded.',
   },
@@ -234,7 +234,7 @@ export default async function DashboardPage() {
                       <p className="text-sm font-semibold text-moonlight mt-0.5">
                         {item.title}
                       </p>
-                      <p className="text-xs text-stardust/80 mt-1 leading-relaxed">
+                      <p className="text-xs text-stardust/100 mt-1 leading-relaxed">
                         {item.desc}
                       </p>
                     </div>
@@ -259,7 +259,7 @@ export default async function DashboardPage() {
               </div>
               <ChevronRight
                 size={16}
-                className="text-stardust/20 group-hover:text-stardust/80 transition-colors"
+                className="text-stardust/20 group-hover:text-stardust/100 transition-colors"
               />
             </Link>
           </div>
@@ -272,7 +272,7 @@ export default async function DashboardPage() {
             <h2 className="font-display text-xl text-moonlight mb-2">
               No registration yet
             </h2>
-            <p className="text-sm text-stardust/80 mb-6">
+            <p className="text-sm text-stardust/100 mb-6">
               You haven&apos;t registered for the Blue Moon 5 Miler yet.
             </p>
             <a href="/register" className="btn-primary inline-block">

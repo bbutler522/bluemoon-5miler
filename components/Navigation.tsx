@@ -106,7 +106,7 @@ export function Navigation() {
 
               <button
                 onClick={handleSignOut}
-                className="text-sm font-body text-stardust/80 hover:text-moonlight tracking-wide uppercase transition-colors duration-200"
+                className="text-sm font-body text-stardust/100 hover:text-moonlight tracking-wide uppercase transition-colors duration-200"
               >
                 Sign out
               </button>
@@ -164,7 +164,7 @@ export function Navigation() {
               )}
               <button
                 onClick={handleSignOut}
-                className="block text-sm font-body text-stardust/80 hover:text-moonlight tracking-wide uppercase transition-colors"
+                className="block text-sm font-body text-stardust/100 hover:text-moonlight tracking-wide uppercase transition-colors"
               >
                 Sign out
               </button>

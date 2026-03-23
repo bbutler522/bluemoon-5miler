@@ -194,7 +194,7 @@ export default function RegisterPage() {
         <div className="max-w-md text-center">
           <CheckCircle2 size={48} className="text-green-400 mx-auto mb-6" />
           <h1 className="font-display text-3xl text-moonlight mb-3">You&apos;re in!</h1>
-          <p className="text-sm text-stardust/80 mb-8">
+          <p className="text-sm text-stardust/100 mb-8">
             Your registration is confirmed. Check your email for details and head to your dashboard.
           </p>
           <button onClick={() => router.push('/dashboard')} className="btn-primary">
@@ -212,7 +212,7 @@ export default function RegisterPage() {
           <div className="text-center mb-10">
             <div className="mx-auto w-14 h-14 mb-6"><Moon /></div>
             <h1 className="font-display text-3xl sm:text-4xl text-moonlight mb-2">Register</h1>
-            <p className="text-sm text-stardust/80">Blue Moon 5 Miler — {RACE_INFO.date}</p>
+            <p className="text-sm text-stardust/100">Blue Moon 5 Miler — {RACE_INFO.date}</p>
           </div>
           <div className="card p-6">
             <MagicLinkForm
@@ -222,7 +222,7 @@ export default function RegisterPage() {
               onSent={(sentEmail) => setAuthEmailHint(sentEmail)}
             />
           </div>
-          <p className="text-[11px] text-stardust/30 text-center mt-4">
+          <p className="text-[11px] text-stardust/50 text-center mt-4">
             Tip: you can leave this tab open — your form progress will be saved on this device.
           </p>
         </div>
@@ -236,7 +236,7 @@ export default function RegisterPage() {
         <div className="text-center mb-10">
           <div className="mx-auto w-14 h-14 mb-6"><Moon /></div>
           <h1 className="font-display text-3xl sm:text-4xl text-moonlight mb-2">Register</h1>
-          <p className="text-sm text-stardust/80">Blue Moon 5 Miler — {RACE_INFO.date}</p>
+          <p className="text-sm text-stardust/100">Blue Moon 5 Miler — {RACE_INFO.date}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -341,14 +341,14 @@ export default function RegisterPage() {
           <div className="card p-5 space-y-3">
             {/* Race entry */}
             <div className="flex justify-between items-center text-sm">
-              <span className="text-stardust/80">Race entry</span>
+              <span className="text-stardust/100">Race entry</span>
               <span className="text-moonlight">${RACE_INFO.price.toFixed(2)}</span>
             </div>
 
             {/* Shirt add-on */}
             {shirtPreorder && (
               <div className="flex justify-between items-center text-sm">
-                <span className="text-stardust/80">T-shirt pre-order{shirtSize ? ` (${shirtSize})` : ''}</span>
+                <span className="text-stardust/100">T-shirt pre-order{shirtSize ? ` (${shirtSize})` : ''}</span>
                 <span className="text-moonlight">+${SHIRT_PREORDER_PRICE.toFixed(2)}</span>
               </div>
             )}

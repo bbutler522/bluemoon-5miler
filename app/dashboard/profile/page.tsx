@@ -135,7 +135,7 @@ export default function ProfilePage() {
               <Calendar size={14} className="text-stardust/30" />
               <div>
                 <p className="text-[10px] text-stardust/30 uppercase tracking-widest">Member Since</p>
-                <p className="text-sm text-stardust/80">
+                <p className="text-sm text-stardust/100">
                   {new Date(user?.created_at).toLocaleDateString('en-US', {
                     month: 'long',
                     day: 'numeric',
