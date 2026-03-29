@@ -18,6 +18,8 @@ export default function RegisterPage() {
 
   const [user, setUser] = useState<any>(null);
   const [step, setStep] = useState<'form' | 'payment' | 'success' | 'waitlisted'>('form');
+  const [alreadyRegistered, setAlreadyRegistered] = useState(false);
+  const [checkingReg, setCheckingReg] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [authEmailHint, setAuthEmailHint] = useState<string>('');
@@ -66,7 +68,7 @@ export default function RegisterPage() {
       // ignore draft parsing errors
     }
 
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (data.user) {
         setUser(data.user);
         if (data.user.email) setEmail(data.user.email);
@@ -75,6 +77,18 @@ export default function RegisterPage() {
           const parts = meta.full_name.split(' ');
           setFirstName(parts[0] || '');
           setLastName(parts.slice(1).join(' ') || '');
+        }
+
+        // Check if they already have a completed registration
+        setCheckingReg(true);
+        try {
+          const res = await fetch('/api/auth/profile');
+          const profile = await res.json();
+          if (profile.registration?.payment_status === 'completed') {
+            setAlreadyRegistered(true);
+          }
+        } catch { /* ignore */ } finally {
+          setCheckingReg(false);
         }
       }
     });
@@ -229,6 +243,42 @@ export default function RegisterPage() {
           <button onClick={() => router.push('/dashboard')} className="btn-secondary">
             View your spot on the waitlist
           </button>
+        </div>
+      </section>
+    );
+  }
+
+  if (checkingReg) {
+    return (
+      <section className="min-h-screen flex items-center justify-center">
+        <Loader2 size={24} className="animate-spin text-stardust/40" />
+      </section>
+    );
+  }
+
+  if (alreadyRegistered) {
+    return (
+      <section className="min-h-screen flex items-center justify-center px-6 pt-16 pb-20">
+        <div className="max-w-md w-full text-center">
+          <CheckCircle2 size={48} className="text-green-400 mx-auto mb-6" />
+          <h1 className="font-display text-3xl text-moonlight mb-3">You&apos;re already in!</h1>
+          <p className="text-sm text-stardust/80 mb-8">
+            Your registration is confirmed. Head to your dashboard to see your race info.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button onClick={() => router.push('/dashboard')} className="btn-primary">
+              Go to Dashboard
+            </button>
+            <button
+              onClick={async () => {
+                await supabase.auth.signOut();
+                router.push('/');
+              }}
+              className="btn-secondary"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
       </section>
     );
