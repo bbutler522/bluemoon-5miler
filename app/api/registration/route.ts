@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase, createAdminSupabase } from '@/lib/supabase-server';
 import { stripe } from '@/lib/stripe';
 import { RACE_INFO, SHIRT_PREORDER_PRICE, RACE_CAPACITY } from '@/lib/constants';
-import { resolvePromo } from '@/app/api/validate-promo/route';
+import { resolvePromo } from '@/lib/promo';
 
 export async function POST(request: NextRequest) {
   try {
