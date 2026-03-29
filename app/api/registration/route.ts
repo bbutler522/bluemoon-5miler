@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase, createAdminSupabase } from '@/lib/supabase-server';
 import { stripe } from '@/lib/stripe';
-import { RACE_INFO, SHIRT_PREORDER_PRICE, PROMO_DISCOUNT } from '@/lib/constants';
-
-const VALID_PROMO_CODE = process.env.PROMO_CODE || '';
+import { RACE_INFO, SHIRT_PREORDER_PRICE, RACE_CAPACITY } from '@/lib/constants';
+import { resolvePromo } from '@/app/api/validate-promo/route';
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,7 +45,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If shirt is pre-ordered, a size is required
     if (shirt_preorder && !shirt_size) {
       return NextResponse.json(
         { error: 'Please select a shirt size to add the pre-order.' },
@@ -54,19 +52,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate promo code server-side
-    const promoValid =
-      VALID_PROMO_CODE.length > 0 &&
-      typeof promo_code === 'string' &&
-      promo_code.trim().toUpperCase() === VALID_PROMO_CODE.toUpperCase();
-    const entryPrice = promoValid
-      ? RACE_INFO.price - PROMO_DISCOUNT
-      : RACE_INFO.price;
+    // Resolve promo code — supports multiple codes with different discount tiers
+    const promo = resolvePromo(typeof promo_code === 'string' ? promo_code : '');
+    const entryPrice = Math.max(0, RACE_INFO.price - promo.discount);
+    const shirtTotal = shirt_preorder ? SHIRT_PREORDER_PRICE : 0;
+    const total = entryPrice + shirtTotal;
 
-    // Check for existing completed registration
+    // Check for existing registration by this user
     const { data: existingReg } = await admin
       .from('registrations')
-      .select('id, payment_status')
+      .select('id, payment_status, waitlisted')
       .eq('user_id', user.id)
       .in('payment_status', ['pending', 'completed'])
       .maybeSingle();
@@ -77,6 +72,22 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    if (existingReg?.waitlisted) {
+      return NextResponse.json(
+        { error: "You're already on the waitlist. We'll be in touch if a spot opens up." },
+        { status: 400 }
+      );
+    }
+
+    // Count confirmed registrations to check capacity
+    const { count: confirmedCount } = await admin
+      .from('registrations')
+      .select('id', { count: 'exact', head: true })
+      .eq('payment_status', 'completed')
+      .eq('waitlisted', false);
+
+    const isFull = (confirmedCount ?? 0) >= RACE_CAPACITY;
 
     const registrationData = {
       user_id: user.id,
@@ -90,6 +101,7 @@ export async function POST(request: NextRequest) {
       gender: gender || null,
       shirt_size: shirt_preorder ? (shirt_size || null) : null,
       shirt_preorder: !!shirt_preorder,
+      waitlisted: isFull,
       payment_status: 'pending',
     };
 
@@ -111,6 +123,33 @@ export async function POST(request: NextRequest) {
       registrationId = newReg.id;
     }
 
+    // === WAITLIST PATH ===
+    if (isFull) {
+      return NextResponse.json({ waitlisted: true });
+    }
+
+    // === FREE PATH — total is $0, skip Stripe entirely ===
+    // This happens when a club member uses the free code and doesn't add a shirt.
+    const completeForFree = async () => {
+      const { data: maxBib } = await admin
+        .from('registrations')
+        .select('bib_number')
+        .order('bib_number', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const nextBib = (maxBib?.bib_number || 100) + 1;
+
+      await admin
+        .from('registrations')
+        .update({
+          payment_status: 'completed',
+          bib_number: nextBib,
+          amount_paid: 0,
+        })
+        .eq('id', registrationId);
+    };
+
     // === DEMO MODE ===
     if (isDemo) {
       const { data: maxBib } = await admin
@@ -121,18 +160,22 @@ export async function POST(request: NextRequest) {
         .maybeSingle();
 
       const nextBib = (maxBib?.bib_number || 100) + 1;
-      const totalAmount = entryPrice + (shirt_preorder ? SHIRT_PREORDER_PRICE : 0);
 
       await admin
         .from('registrations')
         .update({
           payment_status: 'completed',
           bib_number: nextBib,
-          amount_paid: totalAmount,
+          amount_paid: total,
         })
         .eq('id', registrationId);
 
       return NextResponse.json({ demo: true, redirect: '/dashboard?payment=success' });
+    }
+
+    if (total === 0) {
+      await completeForFree();
+      return NextResponse.json({ free: true, redirect: '/dashboard?payment=success' });
     }
 
     // === LIVE MODE — create a Stripe Checkout Session ===
@@ -145,19 +188,22 @@ export async function POST(request: NextRequest) {
 
     const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || '';
 
-    const lineItems: any[] = [
-      {
+    const lineItems: any[] = [];
+
+    // Only add race entry line item if it has a cost
+    if (entryPrice > 0) {
+      lineItems.push({
         price_data: {
           currency: 'usd',
           product_data: {
             name: 'Blue Moon 5 Miler — Race Entry',
-            description: `Sunday, May 31st · Prospect Park · 8:00 PM${promoValid ? ' (promo applied)' : ''}`,
+            description: `Sunday, May 31st · Prospect Park · 8:00 PM${promo.valid ? ' (promo applied)' : ''}`,
           },
           unit_amount: Math.round(entryPrice * 100),
         },
         quantity: 1,
-      },
-    ];
+      });
+    }
 
     if (shirt_preorder) {
       lineItems.push({
@@ -178,12 +224,14 @@ export async function POST(request: NextRequest) {
       line_items: lineItems,
       client_reference_id: registrationId,
       customer_email: email,
+      // Only show Stripe promo code field if no code was applied on our form
+      allow_promotion_codes: !promo.valid,
       success_url: `${origin}/dashboard?payment=success`,
       cancel_url: `${origin}/register?cancelled=true`,
       metadata: {
         registration_id: registrationId,
         shirt_preorder: shirt_preorder ? 'true' : 'false',
-        promo_applied: promoValid ? 'true' : 'false',
+        promo_applied: promo.valid ? 'true' : 'false',
       },
     });
 

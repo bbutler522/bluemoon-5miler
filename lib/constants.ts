@@ -13,6 +13,9 @@ export const RACE_INFO: RaceInfo = {
 
 export const RACE_DATE = new Date('2026-05-31T20:00:00-04:00');
 
+// Race capacity — once this many paid registrations exist, new signups go to waitlist
+export const RACE_CAPACITY = 200;
+
 // Add-ons
 export const SHIRT_PREORDER_PRICE = 22;
 

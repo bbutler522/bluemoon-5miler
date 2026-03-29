@@ -1,19 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PROMO_DISCOUNT } from '@/lib/constants';
+import { RACE_INFO, PROMO_DISCOUNT } from '@/lib/constants';
 
-// The actual promo code string lives in an env var so it never ships in the client bundle.
-const VALID_PROMO_CODE = process.env.PROMO_CODE || '';
+// Comma-separated list of codes that give $3 off entry (e.g. "onceinabluemoon,oncen/abluemoon")
+const DISCOUNT_CODES = (process.env.PROMO_CODES || '')
+  .split(',')
+  .map((c) => c.trim().toUpperCase())
+  .filter(Boolean);
+
+// Single code that makes entry fully free (shirt still charged if selected)
+const FREE_CODE = (process.env.PROMO_CODE_FREE || '').trim().toUpperCase();
+
+export function resolvePromo(code: string): { valid: boolean; discount: number; free: boolean } {
+  const normalized = code.trim().toUpperCase();
+  if (!normalized) return { valid: false, discount: 0, free: false };
+
+  if (FREE_CODE && normalized === FREE_CODE) {
+    return { valid: true, discount: RACE_INFO.price, free: true };
+  }
+  if (DISCOUNT_CODES.length > 0 && DISCOUNT_CODES.includes(normalized)) {
+    return { valid: true, discount: PROMO_DISCOUNT, free: false };
+  }
+  return { valid: false, discount: 0, free: false };
+}
 
 export async function POST(request: NextRequest) {
   const { code } = await request.json();
 
   if (!code || typeof code !== 'string') {
-    return NextResponse.json({ valid: false });
+    return NextResponse.json({ valid: false, discount: 0, free: false });
   }
 
-  const valid =
-    VALID_PROMO_CODE.length > 0 &&
-    code.trim().toUpperCase() === VALID_PROMO_CODE.toUpperCase();
-
-  return NextResponse.json({ valid, discount: valid ? PROMO_DISCOUNT : 0 });
+  return NextResponse.json(resolvePromo(code));
 }

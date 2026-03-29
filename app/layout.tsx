@@ -3,6 +3,7 @@ import { Playfair_Display, DM_Sans, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
+import { Analytics } from "@vercel/analytics/next"
 
 const displayFont = Playfair_Display({
   subsets: ['latin'],
@@ -57,6 +58,7 @@ export default function RootLayout({
         <main className="relative z-10">{children}</main>
         <Footer />
       </body>
+      <Analytics />
     </html>
   );
 }

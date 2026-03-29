@@ -25,8 +25,9 @@ export async function GET(request: NextRequest) {
   const regs = registrations || [];
 
   // Compute stats
-  const completed = regs.filter((r) => r.payment_status === 'completed');
-  const pending = regs.filter((r) => r.payment_status === 'pending');
+  const waitlisted = regs.filter((r) => r.waitlisted);
+  const completed = regs.filter((r) => r.payment_status === 'completed' && !r.waitlisted);
+  const pending = regs.filter((r) => r.payment_status === 'pending' && !r.waitlisted);
   const failed = regs.filter((r) => r.payment_status === 'failed');
   const refunded = regs.filter((r) => r.payment_status === 'refunded');
 
@@ -67,6 +68,7 @@ export async function GET(request: NextRequest) {
     stats: {
       total: regs.length,
       completed: completed.length,
+      waitlisted: waitlisted.length,
       pending: pending.length,
       failed: failed.length,
       refunded: refunded.length,

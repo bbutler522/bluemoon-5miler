@@ -15,6 +15,7 @@ export function isAdmin(email: string | undefined): boolean {
 export interface RegistrationStats {
   total: number;
   completed: number;
+  waitlisted: number;
   pending: number;
   failed: number;
   refunded: number;
@@ -36,6 +37,8 @@ export interface AdminRegistration {
   date_of_birth: string | null;
   gender: string | null;
   shirt_size: string | null;
+  shirt_preorder: boolean;
+  waitlisted: boolean;
   payment_status: string;
   amount_paid: number;
   bib_number: number | null;

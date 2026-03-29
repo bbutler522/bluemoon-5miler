@@ -17,7 +17,7 @@ export default function RegisterPage() {
   const supabase = createClient();
 
   const [user, setUser] = useState<any>(null);
-  const [step, setStep] = useState<'form' | 'payment' | 'success'>('form');
+  const [step, setStep] = useState<'form' | 'payment' | 'success' | 'waitlisted'>('form');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [authEmailHint, setAuthEmailHint] = useState<string>('');
@@ -169,7 +169,13 @@ export default function RegisterPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Registration failed');
 
-      if (data.demo && data.redirect) {
+      if (data.waitlisted) {
+        try { window.localStorage.removeItem(DRAFT_KEY); } catch {}
+        setStep('waitlisted');
+        return;
+      }
+
+      if ((data.demo || data.free) && data.redirect) {
         try { window.localStorage.removeItem(DRAFT_KEY); } catch {}
         router.push(data.redirect);
         return;
@@ -199,6 +205,29 @@ export default function RegisterPage() {
           </p>
           <button onClick={() => router.push('/dashboard')} className="btn-primary">
             Go to Dashboard
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  if (step === 'waitlisted') {
+    return (
+      <section className="min-h-screen flex items-center justify-center px-6 pt-16 pb-20">
+        <div className="max-w-md text-center">
+          <div className="mx-auto w-14 h-14 mb-6 opacity-60">
+            <Moon />
+          </div>
+          <h1 className="font-display text-3xl text-moonlight mb-3">You&apos;re on the waitlist</h1>
+          <p className="text-sm text-stardust/80 mb-2">
+            The race is currently full, but we&apos;ve got your info.
+          </p>
+          <p className="text-sm text-stardust/80 mb-8">
+            If a spot opens up, we&apos;ll reach out to you directly at{' '}
+            <span className="text-moonlight">{email}</span>.
+          </p>
+          <button onClick={() => router.push('/dashboard')} className="btn-secondary">
+            View your spot on the waitlist
           </button>
         </div>
       </section>

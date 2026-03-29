@@ -15,9 +15,17 @@ import {
   User,
   Settings,
   ChevronRight,
+  Hourglass,
 } from 'lucide-react';
 
 const statusConfig = {
+  waitlisted: {
+    icon: Hourglass,
+    label: 'On the Waitlist',
+    color: 'text-blue-300',
+    bg: 'bg-blue-400/10 border-blue-400/20',
+    desc: "The race is full, but you're on the waitlist. We'll reach out if a spot opens up.",
+  },
   completed: {
     icon: CheckCircle2,
     label: 'Confirmed',
@@ -92,9 +100,10 @@ export default async function DashboardPage() {
           <div className="space-y-6">
             {/* Status banner */}
             {(() => {
-              const status =
-                statusConfig[reg.payment_status as keyof typeof statusConfig] ||
-                statusConfig.pending;
+              const statusKey = reg.waitlisted
+                ? 'waitlisted'
+                : (reg.payment_status as keyof typeof statusConfig);
+              const status = statusConfig[statusKey] || statusConfig.pending;
               const StatusIcon = status.icon;
               return (
                 <div
