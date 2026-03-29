@@ -249,23 +249,29 @@ export default function ProfilePage() {
               <p className="text-[10px] uppercase tracking-widest text-stardust/40 font-semibold">
                 Race Options
               </p>
-              <div>
-                <label className="label-field">Shirt Size</label>
-                <select
-                  value={form.shirt_size}
-                  onChange={(e) =>
-                    setForm({ ...form, shirt_size: e.target.value })
-                  }
-                  className="input-field"
-                >
-                  <option value="">Select size...</option>
-                  {SHIRT_SIZES.map((size) => (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {registration.shirt_preorder ? (
+                <div>
+                  <label className="label-field">Shirt Size</label>
+                  <select
+                    value={form.shirt_size}
+                    onChange={(e) =>
+                      setForm({ ...form, shirt_size: e.target.value })
+                    }
+                    className="input-field"
+                  >
+                    <option value="">Select size...</option>
+                    {SHIRT_SIZES.map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <p className="text-xs text-stardust/40">
+                  No shirt pre-order on this registration.
+                </p>
+              )}
             </div>
 
             <button
