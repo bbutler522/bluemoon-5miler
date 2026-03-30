@@ -53,39 +53,68 @@ export async function POST(request: NextRequest) {
         // Get the actual amount paid (accounts for promo codes)
         const amountPaid = (session.amount_total || 5000) / 100;
 
-        // Assign next bib number
-        const { data: maxBib } = await admin
+        const { data: currentRegistration, error: currentError } = await admin
           .from('registrations')
-          .select('bib_number')
-          .order('bib_number', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        const nextBib = (maxBib?.bib_number || 100) + 1;
-
-        const { data: updatedRegistration, error: updateError } = await admin
-          .from('registrations')
-          .update({
-            payment_status: 'completed',
-            amount_paid: amountPaid,
-            bib_number: nextBib,
-            stripe_payment_intent_id: session.payment_intent as string,
-          })
+          .select('id, payment_status, bib_number, stripe_payment_intent_id')
           .eq('id', registrationId)
-          .select('id')
           .maybeSingle();
 
-        if (updateError) throw updateError;
-
-        // If we didn't match a row, fail the webhook so Stripe retries.
-        if (!updatedRegistration) {
+        if (currentError) throw currentError;
+        if (!currentRegistration) {
           throw new Error(
             `No registration row found for completed checkout session. ` +
               `registrationId=${registrationId} sessionId=${session.id}`
           );
         }
 
-        console.log(`✅ Registration ${registrationId} confirmed — bib #${nextBib}`);
+        const paymentIntentId = session.payment_intent as string | null;
+
+        // Idempotency: Stripe may retry/replay the same event.
+        if (
+          currentRegistration.payment_status === 'completed' &&
+          (!paymentIntentId ||
+            currentRegistration.stripe_payment_intent_id === paymentIntentId)
+        ) {
+          console.log(`↪️ Registration ${registrationId} already completed, skipping`);
+          break;
+        }
+
+        let bibToSet = currentRegistration.bib_number;
+
+        // Only allocate a new bib if this runner doesn't have one yet.
+        if (!bibToSet) {
+          const { data: maxBib, error: maxBibError } = await admin
+            .from('registrations')
+            .select('bib_number')
+            .order('bib_number', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (maxBibError) throw maxBibError;
+          bibToSet = (maxBib?.bib_number || 100) + 1;
+        }
+
+        const { data: updatedRegistration, error: updateError } = await admin
+          .from('registrations')
+          .update({
+            payment_status: 'completed',
+            amount_paid: amountPaid,
+            bib_number: bibToSet,
+            stripe_payment_intent_id: paymentIntentId,
+          })
+          .eq('id', registrationId)
+          .select('id, bib_number')
+          .maybeSingle();
+
+        if (updateError) throw updateError;
+        if (!updatedRegistration) {
+          throw new Error(
+            `Registration update returned no row. registrationId=${registrationId} sessionId=${session.id}`
+          );
+        }
+
+        console.log(
+          `✅ Registration ${registrationId} confirmed — bib #${updatedRegistration.bib_number}`
+        );
         break;
       }
 
@@ -140,7 +169,10 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('Webhook processing error:', error);
     return NextResponse.json(
-      { error: 'Webhook processing failed' },
+      {
+        error: 'Webhook processing failed',
+        message: error?.message || 'Unknown error',
+      },
       { status: 500 }
     );
   }
