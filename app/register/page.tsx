@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import { Moon } from '@/components/Moon';
 import MagicLinkForm from '@/components/MagicLinkForm';
+import Image from 'next/image';
 import { RACE_INFO, SHIRT_SIZES, GENDER_OPTIONS, SHIRT_PREORDER_PRICE, PROMO_DISCOUNT } from '@/lib/constants';
-import { Loader2, CheckCircle2, CheckCircle, XCircle, Tag } from 'lucide-react';
+import { Loader2, CheckCircle2, CheckCircle, XCircle, Tag, X } from 'lucide-react';
 
 const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
 
@@ -37,6 +38,7 @@ export default function RegisterPage() {
   // Shirt pre-order
   const [shirtPreorder, setShirtPreorder] = useState(false);
   const [shirtSize, setShirtSize] = useState('');
+  const [lightbox, setLightbox] = useState<'front' | 'back' | null>(null);
 
   // Promo code
   const [promoCode, setPromoCode] = useState('');
@@ -395,6 +397,26 @@ export default function RegisterPage() {
                 </div>
                 <p className="text-xs text-stardust/60 mt-0.5">Optional — pick up at the race.</p>
 
+                {/* Shirt photo preview */}
+                <div className="flex gap-3 mt-3">
+                  {([
+                    { key: 'front', src: '/shirt-front.jpg', alt: 'Shirt front — Commonwealth Running Blue Moon 5 Miler design', label: 'Front' },
+                    { key: 'back',  src: '/shirt-back.jpg',  alt: 'Shirt back — Blue Moon Non-Alcoholic logo',                   label: 'Back'  },
+                  ] as const).map(({ key, src, alt, label }) => (
+                    <div key={key} className="flex flex-col items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); setLightbox(key); }}
+                        className="w-32 h-40 rounded-lg overflow-hidden bg-white/5 border border-lunar-400/10 hover:border-lunar-400/40 hover:scale-105 transition-all focus:outline-none focus:ring-2 focus:ring-lunar-400/40"
+                        title={`View ${label.toLowerCase()} of shirt`}
+                      >
+                        <Image src={src} alt={alt} width={300} height={380} className="w-full h-full object-cover object-top" />
+                      </button>
+                      <span className="text-[10px] text-stardust/80 uppercase tracking-widest">{label}</span>
+                    </div>
+                  ))}
+                </div>
+
                 {/* Size selector — slides in when checked */}
                 {shirtPreorder && (
                   <div className="mt-3">
@@ -522,6 +544,39 @@ export default function RegisterPage() {
           </p>
         </form>
       </div>
+
+      {/* Shirt lightbox */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-6"
+          onClick={() => setLightbox(null)}
+        >
+          <div
+            className="relative max-w-sm w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setLightbox(null)}
+              className="absolute -top-3 -right-3 z-10 w-8 h-8 rounded-full bg-midnight-900 border border-lunar-400/20 flex items-center justify-center text-stardust/80 hover:text-moonlight transition-colors"
+              aria-label="Close"
+            >
+              <X size={15} />
+            </button>
+            <div className="rounded-2xl overflow-hidden border border-lunar-400/20 bg-white/5">
+              <Image
+                src={lightbox === 'front' ? '/shirt-front.png' : '/shirt-back.png'}
+                alt={lightbox === 'front' ? 'Shirt front' : 'Shirt back'}
+                width={600}
+                height={720}
+                className="w-full h-auto"
+              />
+            </div>
+            <p className="text-center text-xs text-stardust/100 uppercase tracking-widest mt-3">
+              {lightbox === 'front' ? 'Front' : 'Back'} — click anywhere to close
+            </p>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
