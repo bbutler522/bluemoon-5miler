@@ -564,7 +564,7 @@ export default function RegisterPage() {
             </button>
             <div className="rounded-2xl overflow-hidden border border-lunar-400/20 bg-white/5">
               <Image
-                src={lightbox === 'front' ? '/shirt-front.png' : '/shirt-back.png'}
+                src={lightbox === 'front' ? '/shirt-front.jpg' : '/shirt-back.jpg'}
                 alt={lightbox === 'front' ? 'Shirt front' : 'Shirt back'}
                 width={600}
                 height={720}
