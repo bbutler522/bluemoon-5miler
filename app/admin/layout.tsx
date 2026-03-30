@@ -7,7 +7,7 @@ import { LayoutDashboard, Users, Tag, Download, ChevronLeft } from 'lucide-react
 const navItems = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard },
   { href: '/admin/registrations', label: 'Registrations', icon: Users },
-  { href: '/admin/promo-codes', label: 'Promo Codes', icon: Tag },
+  // { href: '/admin/promo-codes', label: 'Promo Codes', icon: Tag },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

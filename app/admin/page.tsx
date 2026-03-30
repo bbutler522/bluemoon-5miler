@@ -198,7 +198,7 @@ export default function AdminOverview() {
       </div>
 
       {/* Promo codes now managed in Stripe */}
-      <div className="card p-6">
+      {/* <div className="card p-6">
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs font-semibold uppercase tracking-widest text-stardust/40">
             Promo Codes
@@ -214,7 +214,7 @@ export default function AdminOverview() {
           Discounts and promotion codes are now configured directly in your Stripe Dashboard
           and applied through the Payment Link.
         </p>
-      </div>
+      </div> */}
 
       {/* Quick links */}
       <div className="flex gap-4">
