@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 
         const nextBib = (maxBib?.bib_number || 100) + 1;
 
-        const { data: updatedRows, error: updateError } = await admin
+        const { data: updatedRegistration, error: updateError } = await admin
           .from('registrations')
           .update({
             payment_status: 'completed',
@@ -71,24 +71,17 @@ export async function POST(request: NextRequest) {
             bib_number: nextBib,
             stripe_payment_intent_id: session.payment_intent as string,
           })
-          .eq('id', registrationId);
+          .eq('id', registrationId)
+          .select('id')
+          .maybeSingle();
 
         if (updateError) throw updateError;
 
-        // If we didn't match a row, something is wrong with our correlation key.
-        if (!updatedRows || updatedRows.length === 0) {
-          console.error(
-            'Webhook could not find registration to update',
-            JSON.stringify(
-              {
-                registrationId,
-                sessionId: session.id,
-                client_reference_id: session.client_reference_id,
-                metadata_registration_id: session.metadata?.registration_id,
-              },
-              null,
-              2
-            )
+        // If we didn't match a row, fail the webhook so Stripe retries.
+        if (!updatedRegistration) {
+          throw new Error(
+            `No registration row found for completed checkout session. ` +
+              `registrationId=${registrationId} sessionId=${session.id}`
           );
         }
 
@@ -98,13 +91,24 @@ export async function POST(request: NextRequest) {
 
       case 'checkout.session.expired': {
         const session = event.data.object as Stripe.Checkout.Session;
-        const registrationId = session.client_reference_id;
+        const registrationId =
+          session.client_reference_id || session.metadata?.registration_id;
 
         if (registrationId) {
-          await admin
+          const { data: updatedRegistration, error: updateError } = await admin
             .from('registrations')
             .update({ payment_status: 'failed' })
-            .eq('id', registrationId);
+            .eq('id', registrationId)
+            .select('id')
+            .maybeSingle();
+
+          if (updateError) throw updateError;
+          if (!updatedRegistration) {
+            throw new Error(
+              `No registration row found for expired checkout session. ` +
+                `registrationId=${registrationId} sessionId=${session.id}`
+            );
+          }
 
           console.log(`❌ Registration ${registrationId} expired`);
         }
@@ -116,10 +120,12 @@ export async function POST(request: NextRequest) {
         const paymentIntentId = charge.payment_intent as string;
 
         if (paymentIntentId) {
-          await admin
+          const { error: updateError } = await admin
             .from('registrations')
             .update({ payment_status: 'refunded' })
             .eq('stripe_payment_intent_id', paymentIntentId);
+
+          if (updateError) throw updateError;
 
           console.log(`↩️ Refund processed for PI ${paymentIntentId}`);
         }
