@@ -128,6 +128,9 @@ export async function POST(request: NextRequest) {
           (!paymentIntentId ||
             currentRegistration.stripe_payment_intent_id === paymentIntentId)
         ) {
+          if (!currentRegistration.bib_number) {
+            await assignBibBestEffort(admin, registrationId);
+          }
           console.log(`↪️ Registration ${registrationId} already completed, skipping`);
           break;
         }
