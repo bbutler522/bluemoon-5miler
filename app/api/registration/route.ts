@@ -131,20 +131,10 @@ export async function POST(request: NextRequest) {
     // === FREE PATH — total is $0, skip Stripe entirely ===
     // This happens when a club member uses the free code and doesn't add a shirt.
     const completeForFree = async () => {
-      const { data: maxBib } = await admin
-        .from('registrations')
-        .select('bib_number')
-        .order('bib_number', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      const nextBib = (maxBib?.bib_number || 100) + 1;
-
       await admin
         .from('registrations')
         .update({
           payment_status: 'completed',
-          bib_number: nextBib,
           amount_paid: 0,
         })
         .eq('id', registrationId);
@@ -152,20 +142,10 @@ export async function POST(request: NextRequest) {
 
     // === DEMO MODE ===
     if (isDemo) {
-      const { data: maxBib } = await admin
-        .from('registrations')
-        .select('bib_number')
-        .order('bib_number', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      const nextBib = (maxBib?.bib_number || 100) + 1;
-
       await admin
         .from('registrations')
         .update({
           payment_status: 'completed',
-          bib_number: nextBib,
           amount_paid: total,
         })
         .eq('id', registrationId);

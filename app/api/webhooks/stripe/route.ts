@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 
         const { data: currentRegistration, error: currentError } = await admin
           .from('registrations')
-          .select('id, payment_status, bib_number, stripe_payment_intent_id')
+          .select('id, payment_status, stripe_payment_intent_id')
           .eq('id', registrationId)
           .maybeSingle();
 
@@ -79,30 +79,15 @@ export async function POST(request: NextRequest) {
           break;
         }
 
-        let bibToSet = currentRegistration.bib_number;
-
-        // Only allocate a new bib if this runner doesn't have one yet.
-        if (!bibToSet) {
-          const { data: maxBib, error: maxBibError } = await admin
-            .from('registrations')
-            .select('bib_number')
-            .order('bib_number', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-          if (maxBibError) throw maxBibError;
-          bibToSet = (maxBib?.bib_number || 100) + 1;
-        }
-
         const { data: updatedRegistration, error: updateError } = await admin
           .from('registrations')
           .update({
             payment_status: 'completed',
             amount_paid: amountPaid,
-            bib_number: bibToSet,
             stripe_payment_intent_id: paymentIntentId,
           })
           .eq('id', registrationId)
-          .select('id, bib_number')
+          .select('id')
           .maybeSingle();
 
         if (updateError) throw updateError;
@@ -112,9 +97,7 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        console.log(
-          `✅ Registration ${registrationId} confirmed — bib #${updatedRegistration.bib_number}`
-        );
+        console.log(`✅ Registration ${registrationId} confirmed`);
         break;
       }
 
