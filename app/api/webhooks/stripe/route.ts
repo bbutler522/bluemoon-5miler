@@ -3,6 +3,59 @@ import { createAdminSupabase } from '@/lib/supabase-server';
 import { stripe } from '@/lib/stripe';
 import Stripe from 'stripe';
 
+async function assignBibBestEffort(
+  admin: ReturnType<typeof createAdminSupabase>,
+  registrationId: string
+) {
+  const maxAttempts = 3;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const { data: maxBib, error: maxBibError } = await admin
+      .from('registrations')
+      .select('bib_number')
+      .order('bib_number', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (maxBibError) {
+      console.warn(
+        `Could not read max bib for registration ${registrationId}:`,
+        maxBibError.message
+      );
+      return;
+    }
+
+    const nextBib = (maxBib?.bib_number || 100) + 1;
+
+    const { data: updatedRow, error: assignError } = await admin
+      .from('registrations')
+      .update({ bib_number: nextBib })
+      .eq('id', registrationId)
+      .is('bib_number', null)
+      .select('id, bib_number')
+      .maybeSingle();
+
+    if (!assignError) {
+      if (updatedRow?.bib_number) {
+        console.log(`🏁 Assigned bib #${updatedRow.bib_number} to ${registrationId}`);
+      }
+      return;
+    }
+
+    // 23505 = unique_violation (another webhook grabbed this bib first).
+    if (assignError.code === '23505') {
+      if (attempt < maxAttempts) continue;
+      console.warn(
+        `Bib assignment collision after ${maxAttempts} attempts for ${registrationId}`
+      );
+      return;
+    }
+
+    console.warn(`Bib assignment failed for ${registrationId}:`, assignError.message);
+    return;
+  }
+}
+
 export async function POST(request: NextRequest) {
   // Demo mode — no webhooks needed
   if (!stripe) {
@@ -55,7 +108,7 @@ export async function POST(request: NextRequest) {
 
         const { data: currentRegistration, error: currentError } = await admin
           .from('registrations')
-          .select('id, payment_status, stripe_payment_intent_id')
+          .select('id, payment_status, bib_number, stripe_payment_intent_id')
           .eq('id', registrationId)
           .maybeSingle();
 
@@ -98,6 +151,11 @@ export async function POST(request: NextRequest) {
         }
 
         console.log(`✅ Registration ${registrationId} confirmed`);
+
+        if (!currentRegistration.bib_number) {
+          await assignBibBestEffort(admin, registrationId);
+        }
+
         break;
       }
 
