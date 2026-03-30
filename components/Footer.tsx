@@ -54,10 +54,10 @@ export function Footer() {
                 Instagram
               </a>
               <a
-                href="mailto:race@commonwealthrunclub.com"
+                href="mailto:brennanrome@gmail.com"
                 className="block text-sm text-stardust/100 hover:text-moonlight transition-colors"
               >
-                race@commonwealthrunclub.com
+                brennanrome@gmail.com
               </a>
             </div>
           </div>
