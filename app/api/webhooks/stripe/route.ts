@@ -36,11 +36,17 @@ export async function POST(request: NextRequest) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
 
-        // Payment Links use client_reference_id (not metadata)
-        const registrationId = session.client_reference_id;
+        // We correlate Stripe → registration using either:
+        // - `client_reference_id` (set when we create Checkout Sessions)
+        // - `metadata.registration_id` (more reliable across Stripe flows, incl Payment Links)
+        const registrationId =
+          session.client_reference_id || session.metadata?.registration_id;
 
         if (!registrationId) {
-          console.warn('No client_reference_id on session', session.id);
+          console.warn(
+            'No registration id on session (client_reference_id or metadata.registration_id)',
+            session.id
+          );
           break;
         }
 
@@ -57,7 +63,7 @@ export async function POST(request: NextRequest) {
 
         const nextBib = (maxBib?.bib_number || 100) + 1;
 
-        await admin
+        const { data: updatedRows, error: updateError } = await admin
           .from('registrations')
           .update({
             payment_status: 'completed',
@@ -66,6 +72,25 @@ export async function POST(request: NextRequest) {
             stripe_payment_intent_id: session.payment_intent as string,
           })
           .eq('id', registrationId);
+
+        if (updateError) throw updateError;
+
+        // If we didn't match a row, something is wrong with our correlation key.
+        if (!updatedRows || updatedRows.length === 0) {
+          console.error(
+            'Webhook could not find registration to update',
+            JSON.stringify(
+              {
+                registrationId,
+                sessionId: session.id,
+                client_reference_id: session.client_reference_id,
+                metadata_registration_id: session.metadata?.registration_id,
+              },
+              null,
+              2
+            )
+          );
+        }
 
         console.log(`✅ Registration ${registrationId} confirmed — bib #${nextBib}`);
         break;
