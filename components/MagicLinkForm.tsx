@@ -157,7 +157,7 @@ export default function MagicLinkForm({
         </div>
         <h2 className="font-display text-2xl text-moonlight mb-1">Check your email</h2>
         <p className="text-sm text-stardust/70">
-          We sent a 6-digit code to{' '}
+          You may also sign in with the 6-digit code we sent to{' '}
           <span className="text-moonlight">{email}</span>
         </p>
       </div>
