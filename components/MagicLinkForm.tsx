@@ -157,22 +157,22 @@ export default function MagicLinkForm({
         </div>
         <h2 className="font-display text-2xl text-moonlight mb-1">Check your email</h2>
         <p className="text-sm text-stardust/70">
-          You may also sign in with the 6-digit code we sent to{' '}
+          You may also sign in with the 8-digit code we sent to{' '}
           <span className="text-moonlight">{email}</span>
         </p>
       </div>
 
       <form onSubmit={handleVerifyCode} className="space-y-4">
         <div>
-          <label className="label-field">6-digit code</label>
+          <label className="label-field">8-digit code</label>
           <input
             ref={codeInputRef}
             type="text"
             inputMode="numeric"
             pattern="[0-9]*"
-            maxLength={6}
+            maxLength={8}
             value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 8))}
             className="input-field text-center font-mono text-xl tracking-[0.4em]"
             placeholder="——————"
             required
