@@ -174,7 +174,7 @@ export default function MagicLinkForm({
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 8))}
             className="input-field text-center font-mono text-xl tracking-[0.4em]"
-            placeholder="——————"
+            placeholder="————————"
             required
             autoComplete="one-time-code"
           />
@@ -188,7 +188,7 @@ export default function MagicLinkForm({
 
         <button
           type="submit"
-          disabled={loading || code.length < 6}
+          disabled={loading || code.length < 8}
           className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading && <Loader2 size={16} className="animate-spin mr-2" />}
