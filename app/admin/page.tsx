@@ -23,6 +23,9 @@ interface Stats {
   shirtSizes: Record<string, number>;
   genderBreakdown: Record<string, number>;
   registrationsByDay: { date: string; count: number }[];
+  promoUsage: { code: string; count: number }[];
+  referralLeaderboard: { name: string; count: number }[];
+  runClubs: Record<string, number>;
 }
 
 export default function AdminOverview() {
@@ -215,6 +218,80 @@ export default function AdminOverview() {
           and applied through the Payment Link.
         </p>
       </div> */}
+
+      {/* Promo codes + run clubs */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Promo code usage */}
+        <div className="card p-6">
+          <p className="text-xs font-semibold uppercase tracking-widest text-stardust/40 mb-4">
+            Promo Codes Used
+          </p>
+          {stats.promoUsage.length === 0 ? (
+            <p className="text-sm text-stardust/30 py-4 text-center">No promo codes used yet</p>
+          ) : (
+            <div className="space-y-2">
+              {stats.promoUsage.map(({ code, count }) => (
+                <div key={code} className="flex items-center justify-between">
+                  <span className="text-xs font-mono text-moonlight bg-midnight-900/60 px-2 py-0.5 rounded">
+                    {code}
+                  </span>
+                  <span className="text-xs text-stardust/60 font-mono">
+                    {count} use{count !== 1 ? 's' : ''}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Run clubs */}
+        <div className="card p-6">
+          <p className="text-xs font-semibold uppercase tracking-widest text-stardust/40 mb-4">
+            Run Clubs
+          </p>
+          {Object.keys(stats.runClubs).length === 0 ? (
+            <p className="text-sm text-stardust/30 py-4 text-center">No run club data yet</p>
+          ) : (
+            <div className="space-y-3">
+              {Object.entries(stats.runClubs)
+                .sort(([, a], [, b]) => b - a)
+                .map(([club, count]) => {
+                  const total = Object.values(stats.runClubs).reduce((a, b) => a + b, 0);
+                  const pct = total > 0 ? (count / total) * 100 : 0;
+                  return (
+                    <div key={club} className="flex items-center gap-3">
+                      <span className="text-xs text-stardust/80 flex-1 truncate">{club}</span>
+                      <div className="w-20 h-1.5 bg-midnight-900/60 rounded-full overflow-hidden flex-shrink-0">
+                        <div className="h-full bg-midnight-400/70 rounded-full" style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="text-xs text-stardust/40 font-mono w-4 text-right">{count}</span>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Referral leaderboard */}
+      {stats.referralLeaderboard.length > 0 && (
+        <div className="card p-6">
+          <p className="text-xs font-semibold uppercase tracking-widest text-stardust/40 mb-4">
+            Referral Leaderboard
+          </p>
+          <div className="space-y-2">
+            {stats.referralLeaderboard.map(({ name, count }, i) => (
+              <div key={name} className="flex items-center gap-3">
+                <span className="text-xs text-stardust/30 font-mono w-5 text-right">{i + 1}.</span>
+                <span className="text-sm text-moonlight flex-1 truncate">{name}</span>
+                <span className="text-xs font-mono text-stardust/60">
+                  {count} referral{count !== 1 ? 's' : ''}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Quick links */}
       <div className="flex gap-4">

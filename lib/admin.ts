@@ -24,6 +24,9 @@ export interface RegistrationStats {
   shirtSizes: Record<string, number>;
   genderBreakdown: Record<string, number>;
   registrationsByDay: { date: string; count: number }[];
+  promoUsage: { code: string; count: number }[];
+  referralLeaderboard: { name: string; count: number }[];
+  runClubs: Record<string, number>;
 }
 
 export interface AdminRegistration {
@@ -39,6 +42,9 @@ export interface AdminRegistration {
   shirt_size: string | null;
   shirt_preorder: boolean;
   waitlisted: boolean;
+  promo_code_used: string | null;
+  referred_by: string | null;
+  run_club: string | null;
   payment_status: string;
   amount_paid: number;
   bib_number: number | null;

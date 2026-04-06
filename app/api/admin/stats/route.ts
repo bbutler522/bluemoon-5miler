@@ -64,6 +64,38 @@ export async function GET(request: NextRequest) {
     .slice(-30)
     .map(([date, count]) => ({ date, count }));
 
+  // Promo code usage
+  const promoMap: Record<string, number> = {};
+  regs.forEach((r) => {
+    if (r.promo_code_used) {
+      promoMap[r.promo_code_used] = (promoMap[r.promo_code_used] || 0) + 1;
+    }
+  });
+  const promoUsage = Object.entries(promoMap)
+    .sort(([, a], [, b]) => b - a)
+    .map(([code, count]) => ({ code, count }));
+
+  // Referral leaderboard
+  const referralMap: Record<string, number> = {};
+  regs.forEach((r) => {
+    if (r.referred_by?.trim()) {
+      const key = r.referred_by.trim();
+      referralMap[key] = (referralMap[key] || 0) + 1;
+    }
+  });
+  const referralLeaderboard = Object.entries(referralMap)
+    .sort(([, a], [, b]) => b - a)
+    .map(([name, count]) => ({ name, count }));
+
+  // Run club breakdown
+  const runClubs: Record<string, number> = {};
+  regs.forEach((r) => {
+    if (r.run_club?.trim()) {
+      const key = r.run_club.trim();
+      runClubs[key] = (runClubs[key] || 0) + 1;
+    }
+  });
+
   return NextResponse.json({
     stats: {
       total: regs.length,
@@ -77,6 +109,9 @@ export async function GET(request: NextRequest) {
       shirtSizes,
       genderBreakdown,
       registrationsByDay,
+      promoUsage,
+      referralLeaderboard,
+      runClubs,
     },
   });
 }

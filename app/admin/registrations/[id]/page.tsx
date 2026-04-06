@@ -379,6 +379,37 @@ export default function AdminRegistrationDetail() {
           </div>
         </div>
 
+        {/* Community / tracking fields */}
+        {(reg.promo_code_used || reg.referred_by || reg.run_club) && (
+          <div className="card p-6 space-y-4">
+            <p className="text-[10px] uppercase tracking-widest text-stardust/40 font-semibold">
+              Tracking
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {reg.promo_code_used && (
+                <div>
+                  <p className="text-xs text-stardust/40 mb-1">Promo Code</p>
+                  <span className="text-xs font-mono text-moonlight bg-midnight-900/60 px-2 py-0.5 rounded">
+                    {reg.promo_code_used}
+                  </span>
+                </div>
+              )}
+              {reg.referred_by && (
+                <div>
+                  <p className="text-xs text-stardust/40 mb-1">Referred By</p>
+                  <p className="text-sm text-moonlight">{reg.referred_by}</p>
+                </div>
+              )}
+              {reg.run_club && (
+                <div>
+                  <p className="text-xs text-stardust/40 mb-1">Run Club</p>
+                  <p className="text-sm text-moonlight">{reg.run_club}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Timestamps */}
         <div className="card p-6 space-y-4">
           <p className="text-[10px] uppercase tracking-widest text-stardust/40 font-semibold">

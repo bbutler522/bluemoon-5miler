@@ -18,6 +18,9 @@ CREATE TABLE registrations (
   shirt_size TEXT,
   shirt_preorder BOOLEAN DEFAULT FALSE,
   waitlisted BOOLEAN DEFAULT FALSE,
+  promo_code_used TEXT,
+  referred_by TEXT,
+  run_club TEXT,
   bib_number INTEGER UNIQUE,
   payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded')),
   amount_paid NUMERIC(10,2),
@@ -72,4 +75,7 @@ CREATE POLICY "Users can update own pending registrations"
 -- Migrations (run these if the table already exists):
 --   ALTER TABLE registrations ADD COLUMN IF NOT EXISTS shirt_preorder BOOLEAN DEFAULT FALSE;
 --   ALTER TABLE registrations ADD COLUMN IF NOT EXISTS waitlisted BOOLEAN DEFAULT FALSE;
+--   ALTER TABLE registrations ADD COLUMN IF NOT EXISTS promo_code_used TEXT;
+--   ALTER TABLE registrations ADD COLUMN IF NOT EXISTS referred_by TEXT;
+--   ALTER TABLE registrations ADD COLUMN IF NOT EXISTS run_club TEXT;
 -- ============================================

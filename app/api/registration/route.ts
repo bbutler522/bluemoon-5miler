@@ -36,6 +36,8 @@ export async function POST(request: NextRequest) {
       shirt_size,
       shirt_preorder,
       promo_code,
+      referred_by,
+      run_club,
     } = body;
 
     if (!first_name || !last_name || !email) {
@@ -103,6 +105,9 @@ export async function POST(request: NextRequest) {
       shirt_preorder: !!shirt_preorder,
       waitlisted: isFull,
       payment_status: 'pending',
+      promo_code_used: promo.valid ? (promo_code as string).trim().toUpperCase() : null,
+      referred_by: referred_by?.trim() || null,
+      run_club: run_club?.trim() || null,
     };
 
     let registrationId: string;

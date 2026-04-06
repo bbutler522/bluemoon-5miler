@@ -35,6 +35,10 @@ export default function RegisterPage() {
   const [dob, setDob] = useState('');
   const [gender, setGender] = useState('');
 
+  // Optional community fields
+  const [referredBy, setReferredBy] = useState('');
+  const [runClub, setRunClub] = useState('');
+
   // Shirt pre-order
   const [shirtPreorder, setShirtPreorder] = useState(false);
   const [shirtSize, setShirtSize] = useState('');
@@ -65,6 +69,8 @@ export default function RegisterPage() {
         if (typeof draft?.gender === 'string') setGender(draft.gender);
         if (typeof draft?.shirtPreorder === 'boolean') setShirtPreorder(draft.shirtPreorder);
         if (typeof draft?.shirtSize === 'string') setShirtSize(draft.shirtSize);
+        if (typeof draft?.referredBy === 'string') setReferredBy(draft.referredBy);
+        if (typeof draft?.runClub === 'string') setRunClub(draft.runClub);
       }
     } catch {
       // ignore draft parsing errors
@@ -103,7 +109,7 @@ export default function RegisterPage() {
         JSON.stringify({
           firstName, lastName, email, phone,
           emergencyName, emergencyPhone, dob, gender,
-          shirtPreorder, shirtSize,
+          shirtPreorder, shirtSize, referredBy, runClub,
         })
       );
     } catch {
@@ -179,6 +185,8 @@ export default function RegisterPage() {
           shirt_size: shirtPreorder ? shirtSize : null,
           shirt_preorder: shirtPreorder,
           promo_code: promoStatus === 'valid' ? promoCode : '',
+          referred_by: referredBy || null,
+          run_club: runClub || null,
         }),
       });
 
@@ -375,6 +383,31 @@ export default function RegisterPage() {
                 <label className="label-field">Contact Phone</label>
                 <input type="tel" value={emergencyPhone} onChange={(e) => setEmergencyPhone(e.target.value)} className="input-field" />
               </div>
+            </div>
+          </fieldset>
+
+          {/* Community fields */}
+          <fieldset className="space-y-4">
+            <legend className="label-field mb-2">A couple quick questions <span className="normal-case font-normal text-stardust/40">(optional)</span></legend>
+            <div>
+              <label className="label-field">Who referred you?</label>
+              <input
+                type="text"
+                value={referredBy}
+                onChange={(e) => setReferredBy(e.target.value)}
+                className="input-field"
+                placeholder="A friend's name, Instagram handle, etc."
+              />
+            </div>
+            <div>
+              <label className="label-field">What run club are you with?</label>
+              <input
+                type="text"
+                value={runClub}
+                onChange={(e) => setRunClub(e.target.value)}
+                className="input-field"
+                placeholder="e.g. Commonwealth Running Club"
+              />
             </div>
           </fieldset>
 
