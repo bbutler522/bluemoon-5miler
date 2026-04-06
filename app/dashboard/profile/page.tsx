@@ -33,6 +33,7 @@ export default function ProfilePage() {
     emergency_contact_name: '',
     emergency_contact_phone: '',
     shirt_size: '',
+    run_club: '',
   });
 
   useEffect(() => {
@@ -53,6 +54,7 @@ export default function ProfilePage() {
             emergency_contact_name: data.registration.emergency_contact_name || '',
             emergency_contact_phone: data.registration.emergency_contact_phone || '',
             shirt_size: data.registration.shirt_size || '',
+            run_club: data.registration.run_club || '',
           });
         }
       } catch (err: any) {
@@ -272,6 +274,23 @@ export default function ProfilePage() {
                   No shirt pre-order on this registration.
                 </p>
               )}
+            </div>
+
+            {/* Community */}
+            <div className="card p-6 space-y-4">
+              <p className="text-[10px] uppercase tracking-widest text-stardust/40 font-semibold">
+                Community
+              </p>
+              <div>
+                <label className="label-field">Run Club</label>
+                <input
+                  type="text"
+                  value={form.run_club}
+                  onChange={(e) => setForm({ ...form, run_club: e.target.value })}
+                  className="input-field"
+                  placeholder="e.g. Commonwealth Running Club"
+                />
+              </div>
             </div>
 
             <button

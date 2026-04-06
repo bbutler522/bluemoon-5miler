@@ -53,6 +53,9 @@ export default function AdminRegistrationDetail() {
     shirt_size: '',
     payment_status: '',
     bib_number: '',
+    promo_code_used: '',
+    referred_by: '',
+    run_club: '',
   });
 
   useEffect(() => {
@@ -71,6 +74,9 @@ export default function AdminRegistrationDetail() {
           shirt_size: data.registration.shirt_size || '',
           payment_status: data.registration.payment_status || '',
           bib_number: data.registration.bib_number ? String(data.registration.bib_number) : '',
+          promo_code_used: data.registration.promo_code_used || '',
+          referred_by: data.registration.referred_by || '',
+          run_club: data.registration.run_club || '',
         });
       })
       .catch((e) => setError(e.message))
@@ -379,36 +385,60 @@ export default function AdminRegistrationDetail() {
           </div>
         </div>
 
-        {/* Community / tracking fields */}
-        {(reg.promo_code_used || reg.referred_by || reg.run_club) && (
-          <div className="card p-6 space-y-4">
-            <p className="text-[10px] uppercase tracking-widest text-stardust/40 font-semibold">
-              Tracking
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {reg.promo_code_used && (
-                <div>
-                  <p className="text-xs text-stardust/40 mb-1">Promo Code</p>
-                  <span className="text-xs font-mono text-moonlight bg-midnight-900/60 px-2 py-0.5 rounded">
-                    {reg.promo_code_used}
-                  </span>
-                </div>
+        {/* Community / tracking fields — always shown, editable in edit mode */}
+        <div className="card p-6 space-y-4">
+          <p className="text-[10px] uppercase tracking-widest text-stardust/40 font-semibold">
+            Tracking
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <p className="text-xs text-stardust/40 mb-1">Promo Code Used</p>
+              {editMode ? (
+                <input
+                  type="text"
+                  value={form.promo_code_used}
+                  onChange={(e) => setForm({ ...form, promo_code_used: e.target.value.toUpperCase() })}
+                  className="input-field font-mono"
+                  placeholder="None"
+                />
+              ) : reg.promo_code_used ? (
+                <span className="text-xs font-mono text-moonlight bg-midnight-900/60 px-2 py-0.5 rounded">
+                  {reg.promo_code_used}
+                </span>
+              ) : (
+                <p className="text-sm text-stardust/30">—</p>
               )}
-              {reg.referred_by && (
-                <div>
-                  <p className="text-xs text-stardust/40 mb-1">Referred By</p>
-                  <p className="text-sm text-moonlight">{reg.referred_by}</p>
-                </div>
+            </div>
+            <div>
+              <p className="text-xs text-stardust/40 mb-1">Referred By</p>
+              {editMode ? (
+                <input
+                  type="text"
+                  value={form.referred_by}
+                  onChange={(e) => setForm({ ...form, referred_by: e.target.value })}
+                  className="input-field"
+                  placeholder="None"
+                />
+              ) : (
+                <p className="text-sm text-moonlight">{reg.referred_by || '—'}</p>
               )}
-              {reg.run_club && (
-                <div>
-                  <p className="text-xs text-stardust/40 mb-1">Run Club</p>
-                  <p className="text-sm text-moonlight">{reg.run_club}</p>
-                </div>
+            </div>
+            <div>
+              <p className="text-xs text-stardust/40 mb-1">Run Club</p>
+              {editMode ? (
+                <input
+                  type="text"
+                  value={form.run_club}
+                  onChange={(e) => setForm({ ...form, run_club: e.target.value })}
+                  className="input-field"
+                  placeholder="None"
+                />
+              ) : (
+                <p className="text-sm text-moonlight">{reg.run_club || '—'}</p>
               )}
             </div>
           </div>
-        )}
+        </div>
 
         {/* Timestamps */}
         <div className="card p-6 space-y-4">

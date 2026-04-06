@@ -49,6 +49,7 @@ export async function PATCH(request: NextRequest) {
     'emergency_contact_name',
     'emergency_contact_phone',
     'shirt_size',
+    'run_club',
   ];
 
   const updates: Record<string, any> = {};

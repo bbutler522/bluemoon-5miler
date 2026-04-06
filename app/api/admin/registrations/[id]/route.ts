@@ -53,6 +53,9 @@ export async function PATCH(
     'phone',
     'emergency_contact_name',
     'emergency_contact_phone',
+    'promo_code_used',
+    'referred_by',
+    'run_club',
   ];
 
   const updates: Record<string, any> = {};
