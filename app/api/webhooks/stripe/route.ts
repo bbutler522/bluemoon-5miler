@@ -7,29 +7,28 @@ async function assignBibBestEffort(
   admin: ReturnType<typeof createAdminSupabase>,
   registrationId: string
 ) {
-  const maxAttempts = 3;
+  const { data: maxBib, error: maxBibError } = await admin
+    .from('registrations')
+    .select('bib_number')
+    .order('bib_number', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (maxBibError) {
+    console.warn(
+      `Could not read max bib for registration ${registrationId}:`,
+      maxBibError.message
+    );
+    return;
+  }
+
+  let candidateBib = (maxBib?.bib_number || 100) + 1;
+  const maxAttempts = 200;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    const { data: maxBib, error: maxBibError } = await admin
-      .from('registrations')
-      .select('bib_number')
-      .order('bib_number', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (maxBibError) {
-      console.warn(
-        `Could not read max bib for registration ${registrationId}:`,
-        maxBibError.message
-      );
-      return;
-    }
-
-    const nextBib = (maxBib?.bib_number || 100) + 1;
-
     const { data: updatedRow, error: assignError } = await admin
       .from('registrations')
-      .update({ bib_number: nextBib })
+      .update({ bib_number: candidateBib })
       .eq('id', registrationId)
       .is('bib_number', null)
       .select('id, bib_number')
@@ -42,18 +41,17 @@ async function assignBibBestEffort(
       return;
     }
 
-    // 23505 = unique_violation (another webhook grabbed this bib first).
+    // 23505 = unique_violation. Try the next bib number.
     if (assignError.code === '23505') {
-      if (attempt < maxAttempts) continue;
-      console.warn(
-        `Bib assignment collision after ${maxAttempts} attempts for ${registrationId}`
-      );
-      return;
+      candidateBib += 1;
+      continue;
     }
 
     console.warn(`Bib assignment failed for ${registrationId}:`, assignError.message);
     return;
   }
+
+  console.warn(`Could not assign bib after ${maxAttempts} attempts for ${registrationId}`);
 }
 
 export async function POST(request: NextRequest) {

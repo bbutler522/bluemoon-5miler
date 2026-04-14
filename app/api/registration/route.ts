@@ -4,6 +4,56 @@ import { stripe } from '@/lib/stripe';
 import { RACE_INFO, SHIRT_PREORDER_PRICE, RACE_CAPACITY } from '@/lib/constants';
 import { resolvePromo } from '@/lib/promo';
 
+async function assignBibBestEffort(
+  admin: ReturnType<typeof createAdminSupabase>,
+  registrationId: string
+) {
+  const { data: maxBib, error: maxBibError } = await admin
+    .from('registrations')
+    .select('bib_number')
+    .order('bib_number', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (maxBibError) {
+    console.warn(
+      `Could not read max bib for registration ${registrationId}:`,
+      maxBibError.message
+    );
+    return;
+  }
+
+  let candidateBib = (maxBib?.bib_number || 100) + 1;
+  const maxAttempts = 200;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const { data: updatedRow, error: assignError } = await admin
+      .from('registrations')
+      .update({ bib_number: candidateBib })
+      .eq('id', registrationId)
+      .is('bib_number', null)
+      .select('id, bib_number')
+      .maybeSingle();
+
+    if (!assignError) {
+      if (updatedRow?.bib_number) {
+        console.log(`🏁 Assigned bib #${updatedRow.bib_number} to ${registrationId}`);
+      }
+      return;
+    }
+
+    if (assignError.code === '23505') {
+      candidateBib += 1;
+      continue;
+    }
+
+    console.warn(`Bib assignment failed for ${registrationId}:`, assignError.message);
+    return;
+  }
+
+  console.warn(`Could not assign bib after ${maxAttempts} attempts for ${registrationId}`);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = createServerSupabase();
@@ -143,6 +193,8 @@ export async function POST(request: NextRequest) {
           amount_paid: 0,
         })
         .eq('id', registrationId);
+
+      await assignBibBestEffort(admin, registrationId);
     };
 
     // === DEMO MODE ===
@@ -154,6 +206,8 @@ export async function POST(request: NextRequest) {
           amount_paid: total,
         })
         .eq('id', registrationId);
+
+      await assignBibBestEffort(admin, registrationId);
 
       return NextResponse.json({ demo: true, redirect: '/dashboard?payment=success' });
     }
