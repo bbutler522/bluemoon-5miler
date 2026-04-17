@@ -38,6 +38,12 @@ export function Footer() {
               >
                 Register
               </Link>
+              <Link
+                href="/contact"
+                className="block text-sm text-stardust/100 hover:text-moonlight transition-colors"
+              >
+                Contact
+              </Link>
             </div>
           </div>
 

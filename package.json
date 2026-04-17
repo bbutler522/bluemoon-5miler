@@ -10,6 +10,7 @@
     "db:setup": "node scripts/setup-db.mjs"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@supabase/ssr": "^0.5.0",
     "@supabase/supabase-js": "^2.45.0",
     "@vercel/analytics": "^2.0.1",

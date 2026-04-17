@@ -46,6 +46,7 @@ export function Navigation() {
   const publicLinks = [
     { href: '/#about', label: 'About' },
     { href: '/#details', label: 'Details' },
+    { href: '/contact', label: 'Contact' },
   ];
 
   return (
