@@ -24,6 +24,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [authEmailHint, setAuthEmailHint] = useState<string>('');
+  const [authLinkError, setAuthLinkError] = useState<string>('');
 
   // Form fields
   const [firstName, setFirstName] = useState('');
@@ -53,6 +54,29 @@ export default function RegisterPage() {
   const entryPrice = RACE_INFO.price - promoDiscount;
   const shirtTotal = shirtPreorder ? SHIRT_PREORDER_PRICE : 0;
   const total = entryPrice + shirtTotal;
+
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const authErr = params.get('auth_error');
+      if (authErr === 'missing_code') {
+        setAuthLinkError(
+          'That sign-in link was incomplete or expired. Request a new magic link below.'
+        );
+      } else if (authErr === 'exchange') {
+        setAuthLinkError(
+          'We could not finish signing you in. Open the magic link in the same browser where you entered your email (avoid Gmail or Outlook in-app browsers when possible), or request a fresh link.'
+        );
+      }
+      if (authErr) {
+        const clean = new URL(window.location.href);
+        clean.searchParams.delete('auth_error');
+        window.history.replaceState({}, '', clean.pathname + clean.search);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   useEffect(() => {
     try {
@@ -304,11 +328,19 @@ export default function RegisterPage() {
             <p className="text-sm text-stardust/100">Blue Moon 5 Miler — {RACE_INFO.date}</p>
           </div>
           <div className="card p-6">
+            {authLinkError && (
+              <p className="text-xs text-amber-300/90 bg-amber-400/10 border border-amber-400/25 rounded-lg px-3 py-2 mb-4">
+                {authLinkError}
+              </p>
+            )}
             <MagicLinkForm
               redirectTo="/register"
               initialEmail={authEmailHint || email}
               subtitle="Enter your email to get a magic link. After you click it, you'll come right back here to complete your registration."
-              onSent={(sentEmail) => setAuthEmailHint(sentEmail)}
+              onSent={(sentEmail) => {
+                setAuthEmailHint(sentEmail);
+                setAuthLinkError('');
+              }}
             />
           </div>
           <p className="text-[11px] text-stardust/50 text-center mt-4">

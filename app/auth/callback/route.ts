@@ -1,15 +1,31 @@
 import { createServerSupabase } from '@/lib/supabase-server';
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 
-export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get('code');
-  const redirect = searchParams.get('redirect') || '/dashboard';
+function safeRedirectPath(path: string | null): string {
+  if (!path || !path.startsWith('/') || path.startsWith('//')) {
+    return '/dashboard';
+  }
+  return path;
+}
 
-  if (code) {
-    const supabase = createServerSupabase();
-    await supabase.auth.exchangeCodeForSession(code);
+export async function GET(request: NextRequest) {
+  const url = new URL(request.url);
+  const code = url.searchParams.get('code');
+  const redirectPath = safeRedirectPath(url.searchParams.get('redirect'));
+  const dest = new URL(redirectPath, url.origin);
+
+  if (!code) {
+    dest.searchParams.set('auth_error', 'missing_code');
+    return NextResponse.redirect(dest);
   }
 
-  return NextResponse.redirect(`${origin}${redirect}`);
+  const supabase = createServerSupabase();
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+  if (error) {
+    dest.searchParams.set('auth_error', 'exchange');
+    return NextResponse.redirect(dest);
+  }
+
+  return NextResponse.redirect(dest);
 }
