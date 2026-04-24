@@ -1,9 +1,27 @@
 'use client';
 
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase-browser';
 import { Loader2 } from 'lucide-react';
+
+function isRateLimitedOtp(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false;
+  const e = err as { status?: number; message?: string };
+  if (e.status === 429) return true;
+  const m = (e.message || '').toLowerCase();
+  return m.includes('rate') || m.includes('too many') || m.includes('429');
+}
+
+function otpFriendlyMessage(err: unknown): string {
+  if (isRateLimitedOtp(err)) {
+    return 'Too many sign-in emails were sent from this browser or for this address. Please wait a few minutes before trying again, and check your spam or promotions folder for a link you may already have.';
+  }
+  if (err && typeof err === 'object' && 'message' in err && typeof (err as { message: string }).message === 'string') {
+    return (err as { message: string }).message;
+  }
+  return 'Something went wrong';
+}
 
 type Props = {
   redirectTo: string;
@@ -26,11 +44,21 @@ export default function MagicLinkForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const supabase = createClient();
 
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const id = setInterval(() => {
+      setResendCooldown((n) => (n <= 1 ? 0 : n - 1));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [resendCooldown]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (resendCooldown > 0) return;
     setLoading(true);
     setError('');
     setMessage('');
@@ -49,8 +77,11 @@ export default function MagicLinkForm({
 
       setMessage('Check your email for the magic link to continue.');
       onSent?.(email);
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong');
+    } catch (err: unknown) {
+      setError(otpFriendlyMessage(err));
+      if (isRateLimitedOtp(err)) {
+        setResendCooldown(90);
+      }
     } finally {
       setLoading(false);
     }
@@ -90,11 +121,11 @@ export default function MagicLinkForm({
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || resendCooldown > 0}
           className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading && <Loader2 size={16} className="animate-spin mr-2" />}
-          Send magic link
+          {resendCooldown > 0 ? `Wait ${resendCooldown}s to resend` : 'Send magic link'}
         </button>
       </form>
     </div>
