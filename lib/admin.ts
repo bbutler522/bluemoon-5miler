@@ -47,6 +47,12 @@ export interface AdminRegistration {
   run_club: string | null;
   payment_status: string;
   amount_paid: number;
+  stripe_checkout_session_id: string | null;
+  stripe_checkout_expires_at: string | null;
+  stripe_payment_intent_id: string | null;
+  payment_last_event: string | null;
+  payment_last_event_at: string | null;
+  payment_error_message: string | null;
   bib_number: number | null;
   created_at: string;
   updated_at: string;

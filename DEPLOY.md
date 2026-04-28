@@ -144,7 +144,7 @@ Send the URL to friends, club members, anyone. They can:
 4. Set up the Stripe webhook:
    - Stripe Dashboard → Developers → Webhooks → Add endpoint
    - URL: `https://your-app.vercel.app/api/webhooks/stripe`
-   - Events: `checkout.session.completed`, `checkout.session.expired`, `charge.refunded`
+  - Events: `checkout.session.completed`, `checkout.session.expired`, `payment_intent.payment_failed`, `charge.refunded`
 5. Redeploy
 
 Test with Stripe's test card: `4242 4242 4242 4242`, any future expiry, any CVC.

@@ -274,6 +274,20 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Store checkout session details for support/debugging visibility.
+    await admin
+      .from('registrations')
+      .update({
+        stripe_checkout_session_id: session.id,
+        stripe_checkout_expires_at: session.expires_at
+          ? new Date(session.expires_at * 1000).toISOString()
+          : null,
+        payment_last_event: 'checkout.session.created',
+        payment_last_event_at: new Date().toISOString(),
+        payment_error_message: null,
+      })
+      .eq('id', registrationId);
+
     return NextResponse.json({ checkout_url: session.url });
   } catch (error: any) {
     console.error('Registration error:', error);

@@ -344,11 +344,41 @@ export default function AdminRegistrationDetail() {
             </div>
           </div>
 
-          <div>
-            <label className="label-field">Stripe Reference</label>
-            <p className="text-xs font-mono text-stardust/30 break-all">
-              {reg.stripe_payment_intent_id || '—'}
-            </p>
+          <div className="space-y-3">
+            <div>
+              <label className="label-field">Checkout Session</label>
+              <p className="text-xs font-mono text-stardust/30 break-all">
+                {reg.stripe_checkout_session_id || '—'}
+              </p>
+            </div>
+            <div>
+              <label className="label-field">Payment Intent</label>
+              <p className="text-xs font-mono text-stardust/30 break-all">
+                {reg.stripe_payment_intent_id || '—'}
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="label-field">Last Stripe Event</label>
+                <p className="text-xs text-stardust/100 break-all">
+                  {reg.payment_last_event || '—'}
+                </p>
+              </div>
+              <div>
+                <label className="label-field">Event Time</label>
+                <p className="text-xs text-stardust/100">
+                  {reg.payment_last_event_at
+                    ? new Date(reg.payment_last_event_at).toLocaleString('en-US')
+                    : '—'}
+                </p>
+              </div>
+            </div>
+            <div>
+              <label className="label-field">Payment Error</label>
+              <p className="text-xs text-red-300/90">
+                {reg.payment_error_message || '—'}
+              </p>
+            </div>
           </div>
         </div>
 

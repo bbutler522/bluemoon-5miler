@@ -4,7 +4,7 @@ export function Footer() {
   return (
     <footer className="relative z-10 border-t border-lunar-400/10 bg-midnight-950/50">
       <div className="max-w-6xl mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Brand */}
           <div>
             <p className="font-display text-xl text-moonlight mb-3">
@@ -38,16 +38,10 @@ export function Footer() {
               >
                 Register
               </Link>
-              <Link
-                href="/contact"
-                className="block text-sm text-stardust/100 hover:text-moonlight transition-colors"
-              >
-                Contact
-              </Link>
             </div>
           </div>
 
-          {/* Contact */}
+          {/* Connect */}
           <div>
             <p className="label-field mb-4">Connect</p>
             <div className="space-y-2">
@@ -59,6 +53,19 @@ export function Footer() {
               >
                 Instagram
               </a>
+            </div>
+          </div>
+
+          {/* Need help */}
+          <div>
+            <p className="label-field mb-4">Need Help?</p>
+            <div className="space-y-2">
+              <Link
+                href="/contact"
+                className="block text-sm text-stardust/100 hover:text-moonlight transition-colors"
+              >
+                Contact
+              </Link>
               <a
                 href="mailto:brennanrome@gmail.com"
                 className="block text-sm text-stardust/100 hover:text-moonlight transition-colors"
