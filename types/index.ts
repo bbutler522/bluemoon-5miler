@@ -11,7 +11,12 @@ export interface Registration {
   gender?: 'male' | 'female' | 'non-binary' | 'prefer-not-to-say';
   shirt_size?: 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL';
   payment_status: 'pending' | 'completed' | 'failed' | 'refunded';
+  stripe_checkout_session_id?: string;
+  stripe_checkout_expires_at?: string;
   stripe_payment_intent_id?: string;
+  payment_last_event?: string;
+  payment_last_event_at?: string;
+  payment_error_message?: string;
   amount_paid: number;
   bib_number?: number;
   created_at: string;

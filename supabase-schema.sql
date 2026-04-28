@@ -24,7 +24,12 @@ CREATE TABLE registrations (
   bib_number INTEGER UNIQUE,
   payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded')),
   amount_paid NUMERIC(10,2),
+  stripe_checkout_session_id TEXT,
+  stripe_checkout_expires_at TIMESTAMP WITH TIME ZONE,
   stripe_payment_intent_id TEXT,
+  payment_last_event TEXT,
+  payment_last_event_at TIMESTAMP WITH TIME ZONE,
+  payment_error_message TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -32,6 +37,7 @@ CREATE TABLE registrations (
 -- Index for fast lookups
 CREATE INDEX idx_registrations_user_id ON registrations(user_id);
 CREATE INDEX idx_registrations_payment_status ON registrations(payment_status);
+CREATE INDEX idx_registrations_checkout_session ON registrations(stripe_checkout_session_id);
 CREATE INDEX idx_registrations_stripe_pi ON registrations(stripe_payment_intent_id);
 
 -- Auto-update the updated_at timestamp
@@ -78,4 +84,10 @@ CREATE POLICY "Users can update own pending registrations"
 --   ALTER TABLE registrations ADD COLUMN IF NOT EXISTS promo_code_used TEXT;
 --   ALTER TABLE registrations ADD COLUMN IF NOT EXISTS referred_by TEXT;
 --   ALTER TABLE registrations ADD COLUMN IF NOT EXISTS run_club TEXT;
+--   ALTER TABLE registrations ADD COLUMN IF NOT EXISTS stripe_checkout_session_id TEXT;
+--   ALTER TABLE registrations ADD COLUMN IF NOT EXISTS stripe_checkout_expires_at TIMESTAMP WITH TIME ZONE;
+--   ALTER TABLE registrations ADD COLUMN IF NOT EXISTS payment_last_event TEXT;
+--   ALTER TABLE registrations ADD COLUMN IF NOT EXISTS payment_last_event_at TIMESTAMP WITH TIME ZONE;
+--   ALTER TABLE registrations ADD COLUMN IF NOT EXISTS payment_error_message TEXT;
+--   CREATE INDEX IF NOT EXISTS idx_registrations_checkout_session ON registrations(stripe_checkout_session_id);
 -- ============================================

@@ -139,6 +139,13 @@ export async function POST(request: NextRequest) {
             payment_status: 'completed',
             amount_paid: amountPaid,
             stripe_payment_intent_id: paymentIntentId,
+            stripe_checkout_session_id: session.id,
+            stripe_checkout_expires_at: session.expires_at
+              ? new Date(session.expires_at * 1000).toISOString()
+              : null,
+            payment_last_event: event.type,
+            payment_last_event_at: new Date().toISOString(),
+            payment_error_message: null,
           })
           .eq('id', registrationId)
           .select('id')
@@ -168,7 +175,16 @@ export async function POST(request: NextRequest) {
         if (registrationId) {
           const { data: updatedRegistration, error: updateError } = await admin
             .from('registrations')
-            .update({ payment_status: 'failed' })
+            .update({
+              payment_status: 'failed',
+              stripe_checkout_session_id: session.id,
+              stripe_checkout_expires_at: session.expires_at
+                ? new Date(session.expires_at * 1000).toISOString()
+                : null,
+              payment_last_event: event.type,
+              payment_last_event_at: new Date().toISOString(),
+              payment_error_message: 'Checkout session expired before payment was completed.',
+            })
             .eq('id', registrationId)
             .select('id')
             .maybeSingle();
@@ -186,6 +202,45 @@ export async function POST(request: NextRequest) {
         break;
       }
 
+      case 'payment_intent.payment_failed': {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        const registrationId = paymentIntent.metadata?.registration_id || null;
+        const paymentIntentId = paymentIntent.id;
+        const paymentErrorMessage =
+          paymentIntent.last_payment_error?.message || 'Payment failed in Stripe.';
+
+        if (registrationId) {
+          const { error: updateError } = await admin
+            .from('registrations')
+            .update({
+              payment_status: 'failed',
+              stripe_payment_intent_id: paymentIntentId,
+              payment_last_event: event.type,
+              payment_last_event_at: new Date().toISOString(),
+              payment_error_message: paymentErrorMessage,
+            })
+            .eq('id', registrationId);
+
+          if (updateError) throw updateError;
+          console.log(`❌ Payment failed for registration ${registrationId}: ${paymentErrorMessage}`);
+          break;
+        }
+
+        const { error: fallbackUpdateError } = await admin
+          .from('registrations')
+          .update({
+            payment_status: 'failed',
+            payment_last_event: event.type,
+            payment_last_event_at: new Date().toISOString(),
+            payment_error_message: paymentErrorMessage,
+          })
+          .eq('stripe_payment_intent_id', paymentIntentId);
+
+        if (fallbackUpdateError) throw fallbackUpdateError;
+        console.log(`❌ Payment failed for PI ${paymentIntentId}: ${paymentErrorMessage}`);
+        break;
+      }
+
       case 'charge.refunded': {
         const charge = event.data.object as Stripe.Charge;
         const paymentIntentId = charge.payment_intent as string;
@@ -193,7 +248,11 @@ export async function POST(request: NextRequest) {
         if (paymentIntentId) {
           const { error: updateError } = await admin
             .from('registrations')
-            .update({ payment_status: 'refunded' })
+            .update({
+              payment_status: 'refunded',
+              payment_last_event: event.type,
+              payment_last_event_at: new Date().toISOString(),
+            })
             .eq('stripe_payment_intent_id', paymentIntentId);
 
           if (updateError) throw updateError;
