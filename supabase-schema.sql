@@ -1,6 +1,5 @@
 -- ============================================
 -- Blue Moon 5 Miler — Supabase Schema
--- (Payment Link version — no promo codes table)
 -- ============================================
 
 -- Registrations table
@@ -54,11 +53,34 @@ CREATE TRIGGER registrations_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at();
 
+-- Promo codes table (admin-managed)
+CREATE TABLE promo_codes (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  code TEXT NOT NULL,
+  discount_type TEXT NOT NULL CHECK (discount_type IN ('fixed', 'percentage')),
+  discount_value NUMERIC(10,2) NOT NULL CHECK (discount_value > 0),
+  max_uses INTEGER CHECK (max_uses IS NULL OR max_uses > 0),
+  is_active BOOLEAN DEFAULT TRUE,
+  valid_from TIMESTAMP WITH TIME ZONE,
+  valid_until TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX idx_promo_codes_code_upper ON promo_codes (upper(code));
+CREATE INDEX idx_promo_codes_active ON promo_codes(is_active);
+
+CREATE TRIGGER promo_codes_updated_at
+  BEFORE UPDATE ON promo_codes
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at();
+
 -- ============================================
 -- Row Level Security
 -- ============================================
 
 ALTER TABLE registrations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE promo_codes ENABLE ROW LEVEL SECURITY;
 
 -- Users can read their own registrations
 CREATE POLICY "Users can view own registrations"
@@ -75,6 +97,11 @@ CREATE POLICY "Users can update own pending registrations"
   ON registrations FOR UPDATE
   USING (auth.uid() = user_id AND payment_status = 'pending');
 
+-- Users can view promo codes (actual enforcement happens in server routes)
+CREATE POLICY "Authenticated users can view promo codes"
+  ON promo_codes FOR SELECT
+  USING (auth.role() = 'authenticated');
+
 -- Service role bypasses RLS (used by webhooks and admin API routes)
 
 -- ============================================
@@ -90,4 +117,17 @@ CREATE POLICY "Users can update own pending registrations"
 --   ALTER TABLE registrations ADD COLUMN IF NOT EXISTS payment_last_event_at TIMESTAMP WITH TIME ZONE;
 --   ALTER TABLE registrations ADD COLUMN IF NOT EXISTS payment_error_message TEXT;
 --   CREATE INDEX IF NOT EXISTS idx_registrations_checkout_session ON registrations(stripe_checkout_session_id);
+--   CREATE TABLE IF NOT EXISTS promo_codes (
+--     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+--     code TEXT NOT NULL,
+--     discount_type TEXT NOT NULL CHECK (discount_type IN ('fixed', 'percentage')),
+--     discount_value NUMERIC(10,2) NOT NULL CHECK (discount_value > 0),
+--     max_uses INTEGER CHECK (max_uses IS NULL OR max_uses > 0),
+--     is_active BOOLEAN DEFAULT TRUE,
+--     valid_from TIMESTAMP WITH TIME ZONE,
+--     valid_until TIMESTAMP WITH TIME ZONE,
+--     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+--     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+--   );
+--   CREATE UNIQUE INDEX IF NOT EXISTS idx_promo_codes_code_upper ON promo_codes (upper(code));
 -- ============================================

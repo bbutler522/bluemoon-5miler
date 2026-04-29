@@ -8,5 +8,5 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ valid: false, discount: 0, free: false });
   }
 
-  return NextResponse.json(resolvePromo(code));
+  return NextResponse.json(await resolvePromo(code));
 }

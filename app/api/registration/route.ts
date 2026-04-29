@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Resolve promo code — supports multiple codes with different discount tiers
-    const promo = resolvePromo(typeof promo_code === 'string' ? promo_code : '');
+    const promo = await resolvePromo(typeof promo_code === 'string' ? promo_code : '');
     const entryPrice = Math.max(0, RACE_INFO.price - promo.discount);
     const shirtTotal = shirt_preorder ? SHIRT_PREORDER_PRICE : 0;
     const total = entryPrice + shirtTotal;

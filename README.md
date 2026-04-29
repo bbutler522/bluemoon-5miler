@@ -142,15 +142,16 @@ Or connect your GitHub repo to Vercel for auto-deploys on push.
 
 ## Managing Promo Codes
 
-Promo codes are managed directly in Supabase. Go to **Table Editor → promo_codes**.
+Promo codes are managed in the app at **`/admin/promo-codes`**.
+You can create, edit, activate/deactivate, and delete codes there.
 
 Two codes are seeded by default:
 - `EARLYBIRD` — 20% off, limited to 50 uses
 - `10OFF` — $10 off, unlimited uses
 
-### Create a Custom Code
+### Create a Custom Code (SQL fallback)
 
-In Supabase SQL Editor:
+If needed, you can still insert directly via Supabase SQL Editor:
 
 ```sql
 insert into public.promo_codes (code, discount_type, discount_value, max_uses, valid_until)
@@ -176,7 +177,7 @@ values ('CWRC2026', 'percentage', 15, 100, '2026-05-30T23:59:59Z');
 ├── app/
 │   ├── api/
 │   │   ├── registration/route.ts    # Creates registration + Stripe session
-│   │   ├── promo-codes/route.ts     # Validates promo codes
+│   │   ├── validate-promo/route.ts  # Validates promo codes
 │   │   └── webhooks/stripe/route.ts # Stripe webhook handler
 │   ├── auth/callback/route.ts       # Email confirmation callback
 │   ├── dashboard/page.tsx           # User's registration dashboard

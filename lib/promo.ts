@@ -1,32 +1,61 @@
-import { RACE_INFO, PROMO_DISCOUNT } from '@/lib/constants';
+import { RACE_INFO } from '@/lib/constants';
+import { createAdminSupabase } from '@/lib/supabase-server';
 
-// Comma-separated list of codes giving $3 off entry (e.g. "onceinabluemoon,oncen/abluemoon")
-const DISCOUNT_CODES_3 = (process.env.PROMO_CODES || '')
-  .split(',')
-  .map((c) => c.trim().toUpperCase())
-  .filter(Boolean);
+type PromoRow = {
+  code: string;
+  discount_type: 'fixed' | 'percentage';
+  discount_value: number;
+  max_uses: number | null;
+  is_active: boolean;
+  valid_from: string | null;
+  valid_until: string | null;
+};
 
-// Comma-separated list of codes giving $5 off entry (e.g. "WELCOMEFGR25")
-const DISCOUNT_CODES_5 = (process.env.PROMO_CODES_5 || '')
-  .split(',')
-  .map((c) => c.trim().toUpperCase())
-  .filter(Boolean);
-
-// Code that makes entry fully free (shirt still charged if selected)
-const FREE_CODE = (process.env.PROMO_CODE_FREE || '').trim().toUpperCase();
-
-export function resolvePromo(code: string): { valid: boolean; discount: number; free: boolean } {
+export async function resolvePromo(
+  code: string
+): Promise<{ valid: boolean; discount: number; free: boolean }> {
   const normalized = code.trim().toUpperCase();
   if (!normalized) return { valid: false, discount: 0, free: false };
 
-  if (FREE_CODE && normalized === FREE_CODE) {
-    return { valid: true, discount: RACE_INFO.price, free: true };
+  const admin = createAdminSupabase();
+
+  const { data: promo, error: promoError } = await admin
+    .from('promo_codes')
+    .select('code, discount_type, discount_value, max_uses, is_active, valid_from, valid_until')
+    .eq('code', normalized)
+    .maybeSingle<PromoRow>();
+
+  if (promoError || !promo || !promo.is_active) {
+    return { valid: false, discount: 0, free: false };
   }
-  if (DISCOUNT_CODES_5.length > 0 && DISCOUNT_CODES_5.includes(normalized)) {
-    return { valid: true, discount: 5, free: false };
+
+  const now = new Date();
+  if (promo.valid_from && new Date(promo.valid_from) > now) {
+    return { valid: false, discount: 0, free: false };
   }
-  if (DISCOUNT_CODES_3.length > 0 && DISCOUNT_CODES_3.includes(normalized)) {
-    return { valid: true, discount: PROMO_DISCOUNT, free: false };
+  if (promo.valid_until && new Date(promo.valid_until) < now) {
+    return { valid: false, discount: 0, free: false };
   }
-  return { valid: false, discount: 0, free: false };
+
+  if (promo.max_uses !== null) {
+    const { count, error: countError } = await admin
+      .from('registrations')
+      .select('id', { count: 'exact', head: true })
+      .eq('promo_code_used', normalized)
+      .eq('payment_status', 'completed');
+
+    if (countError || (count ?? 0) >= promo.max_uses) {
+      return { valid: false, discount: 0, free: false };
+    }
+  }
+
+  const rawDiscount =
+    promo.discount_type === 'percentage'
+      ? (RACE_INFO.price * Number(promo.discount_value || 0)) / 100
+      : Number(promo.discount_value || 0);
+
+  const discount = Math.max(0, Math.min(RACE_INFO.price, Number(rawDiscount.toFixed(2))));
+  const free = discount >= RACE_INFO.price;
+
+  return { valid: discount > 0, discount, free };
 }
