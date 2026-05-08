@@ -206,9 +206,9 @@ export default function HomePage() {
             <Link href="/register" className="btn-primary">
               Register Now
             </Link>
-            <p className="text-xs text-stardust/80 mt-6">
+            {/* <p className="text-xs text-stardust/80 mt-6">
               Register by Sunday, May 3rd. Spots are limited.
-            </p>
+            </p> */}
           </div>
         </div>
       </section>
