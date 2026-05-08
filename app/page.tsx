@@ -198,10 +198,10 @@ export default function HomePage() {
           <div className="card p-10 sm:p-14 animate-pulse-glow">
             <p className="label-field mb-4">Registration</p>
             <h2 className="font-display text-4xl sm:text-5xl text-moonlight mb-3">
-              $18
+              ${RACE_INFO.price}
             </h2>
             <p className="text-sm text-stardust/100 mb-8">
-              $18 standard entry. $15 if you completed the pre-survey (discount code sent via email).
+              ${RACE_INFO.price} standard entry. ${RACE_INFO.price - 3} if you completed the pre-survey (discount code sent via email).
             </p>
             <Link href="/register" className="btn-primary">
               Register Now
