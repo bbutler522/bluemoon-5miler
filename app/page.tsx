@@ -231,7 +231,7 @@ export default function HomePage() {
               },
               {
                 q: 'Is there a shirt?',
-                a: 'T-shirt pre-order is closed — we’re not taking additional shirt orders for this year’s race.',
+                a: 'Online pre-order is closed, but some additional shirts will be available for purchase in person at the race.',
               },
               {
                 q: 'What’s at the finish?',
