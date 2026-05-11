@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase, createAdminSupabase } from '@/lib/supabase-server';
 import { stripe } from '@/lib/stripe';
-import { RACE_INFO, SHIRT_PREORDER_PRICE, RACE_CAPACITY } from '@/lib/constants';
+import { RACE_INFO, RACE_CAPACITY } from '@/lib/constants';
 import { resolvePromo } from '@/lib/promo';
 
 async function assignBibBestEffort(
@@ -83,8 +83,6 @@ export async function POST(request: NextRequest) {
       emergency_contact_phone,
       date_of_birth,
       gender,
-      shirt_size,
-      shirt_preorder,
       promo_code,
       referred_by,
       run_club,
@@ -97,18 +95,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (shirt_preorder && !shirt_size) {
-      return NextResponse.json(
-        { error: 'Please select a shirt size to add the pre-order.' },
-        { status: 400 }
-      );
-    }
-
     // Resolve promo code — supports multiple codes with different discount tiers
     const promo = await resolvePromo(typeof promo_code === 'string' ? promo_code : '');
     const entryPrice = Math.max(0, RACE_INFO.price - promo.discount);
-    const shirtTotal = shirt_preorder ? SHIRT_PREORDER_PRICE : 0;
-    const total = entryPrice + shirtTotal;
+    const total = entryPrice;
 
     // Check for existing registration by this user
     const { data: existingReg } = await admin
@@ -151,8 +141,8 @@ export async function POST(request: NextRequest) {
       emergency_contact_phone: emergency_contact_phone || null,
       date_of_birth: date_of_birth || null,
       gender: gender || null,
-      shirt_size: shirt_preorder ? (shirt_size || null) : null,
-      shirt_preorder: !!shirt_preorder,
+      shirt_size: null,
+      shirt_preorder: false,
       waitlisted: isFull,
       payment_status: 'pending',
       promo_code_used: promo.valid ? (promo_code as string).trim().toUpperCase() : null,
@@ -184,7 +174,7 @@ export async function POST(request: NextRequest) {
     }
 
     // === FREE PATH — total is $0, skip Stripe entirely ===
-    // This happens when a club member uses the free code and doesn't add a shirt.
+    // This happens when a club member uses the free code (entry is $0).
     const completeForFree = async () => {
       await admin
         .from('registrations')
@@ -244,20 +234,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (shirt_preorder) {
-      lineItems.push({
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: 'Blue Moon 5 Miler — T-Shirt Pre-Order',
-            description: `Size: ${shirt_size}`,
-          },
-          unit_amount: Math.round(SHIRT_PREORDER_PRICE * 100),
-        },
-        quantity: 1,
-      });
-    }
-
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: lineItems,
@@ -269,7 +245,7 @@ export async function POST(request: NextRequest) {
       cancel_url: `${origin}/register?cancelled=true`,
       metadata: {
         registration_id: registrationId,
-        shirt_preorder: shirt_preorder ? 'true' : 'false',
+        shirt_preorder: 'false',
         promo_applied: promo.valid ? 'true' : 'false',
       },
     });

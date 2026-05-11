@@ -5,9 +5,8 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import { Moon } from '@/components/Moon';
 import MagicLinkForm from '@/components/MagicLinkForm';
-import Image from 'next/image';
-import { RACE_INFO, SHIRT_SIZES, GENDER_OPTIONS, SHIRT_PREORDER_PRICE, PROMO_DISCOUNT } from '@/lib/constants';
-import { Loader2, CheckCircle2, CheckCircle, XCircle, Tag, X } from 'lucide-react';
+import { RACE_INFO, GENDER_OPTIONS } from '@/lib/constants';
+import { Loader2, CheckCircle2, CheckCircle, XCircle, Tag } from 'lucide-react';
 
 const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
 
@@ -40,11 +39,6 @@ export default function RegisterPage() {
   const [referredBy, setReferredBy] = useState('');
   const [runClub, setRunClub] = useState('');
 
-  // Shirt pre-order
-  const [shirtPreorder, setShirtPreorder] = useState(false);
-  const [shirtSize, setShirtSize] = useState('');
-  const [lightbox, setLightbox] = useState<'front' | 'back' | null>(null);
-
   // Promo code
   const [promoCode, setPromoCode] = useState('');
   const [promoStatus, setPromoStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle');
@@ -52,8 +46,7 @@ export default function RegisterPage() {
 
   // Derived totals
   const entryPrice = RACE_INFO.price - promoDiscount;
-  const shirtTotal = shirtPreorder ? SHIRT_PREORDER_PRICE : 0;
-  const total = entryPrice + shirtTotal;
+  const total = entryPrice;
 
   useEffect(() => {
     try {
@@ -91,8 +84,6 @@ export default function RegisterPage() {
         if (typeof draft?.emergencyPhone === 'string') setEmergencyPhone(draft.emergencyPhone);
         if (typeof draft?.dob === 'string') setDob(draft.dob);
         if (typeof draft?.gender === 'string') setGender(draft.gender);
-        if (typeof draft?.shirtPreorder === 'boolean') setShirtPreorder(draft.shirtPreorder);
-        if (typeof draft?.shirtSize === 'string') setShirtSize(draft.shirtSize);
         if (typeof draft?.referredBy === 'string') setReferredBy(draft.referredBy);
         if (typeof draft?.runClub === 'string') setRunClub(draft.runClub);
       }
@@ -133,18 +124,13 @@ export default function RegisterPage() {
         JSON.stringify({
           firstName, lastName, email, phone,
           emergencyName, emergencyPhone, dob, gender,
-          shirtPreorder, shirtSize, referredBy, runClub,
+          referredBy, runClub,
         })
       );
     } catch {
       // ignore quota / privacy mode errors
     }
-  }, [firstName, lastName, email, phone, emergencyName, emergencyPhone, dob, gender, shirtPreorder, shirtSize]);
-
-  // Clear shirt size when pre-order is toggled off
-  useEffect(() => {
-    if (!shirtPreorder) setShirtSize('');
-  }, [shirtPreorder]);
+  }, [firstName, lastName, email, phone, emergencyName, emergencyPhone, dob, gender, referredBy, runClub]);
 
   async function handleApplyPromo() {
     if (!promoCode.trim()) return;
@@ -187,12 +173,6 @@ export default function RegisterPage() {
       return;
     }
 
-    if (shirtPreorder && !shirtSize) {
-      setError('Please select a shirt size to add the pre-order.');
-      setLoading(false);
-      return;
-    }
-
     try {
       const res = await fetch('/api/registration', {
         method: 'POST',
@@ -206,8 +186,6 @@ export default function RegisterPage() {
           emergency_contact_phone: emergencyPhone,
           date_of_birth: dob || null,
           gender: gender || null,
-          shirt_size: shirtPreorder ? shirtSize : null,
-          shirt_preorder: shirtPreorder,
           promo_code: promoStatus === 'valid' ? promoCode : '',
           referred_by: referredBy || null,
           run_club: runClub || null,
@@ -443,66 +421,6 @@ export default function RegisterPage() {
             </div>
           </fieldset>
 
-          {/* Race options — T-shirt pre-order */}
-          <fieldset className="space-y-4">
-            <legend className="label-field mb-2">Add-ons</legend>
-
-            {/* Shirt toggle card */}
-            <label className={`card px-5 py-4 flex items-start gap-4 cursor-pointer transition-colors ${shirtPreorder ? 'border-lunar-400/30 bg-midnight-800/60' : ''}`}>
-              <input
-                type="checkbox"
-                checked={shirtPreorder}
-                onChange={(e) => setShirtPreorder(e.target.checked)}
-                className="mt-1 accent-moonlight flex-shrink-0"
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-moonlight">T-Shirt Pre-Order</p>
-                  <span className="text-sm text-moonlight font-display">+${SHIRT_PREORDER_PRICE}</span>
-                </div>
-                <p className="text-xs text-stardust/60 mt-0.5">Optional — pick up at the race.</p>
-
-                {/* Shirt photo preview */}
-                <div className="flex gap-3 mt-3">
-                  {([
-                    { key: 'front', src: '/shirt-front.jpg', alt: 'Shirt front — Commonwealth Running Blue Moon 5 Miler design', label: 'Front' },
-                    { key: 'back',  src: '/shirt-back.jpg',  alt: 'Shirt back — Blue Moon Non-Alcoholic logo',                   label: 'Back'  },
-                  ] as const).map(({ key, src, alt, label }) => (
-                    <div key={key} className="flex flex-col items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={(e) => { e.preventDefault(); setLightbox(key); }}
-                        className="w-32 h-40 rounded-lg overflow-hidden bg-white/5 border border-lunar-400/10 hover:border-lunar-400/40 hover:scale-105 transition-all focus:outline-none focus:ring-2 focus:ring-lunar-400/40"
-                        title={`View ${label.toLowerCase()} of shirt`}
-                      >
-                        <Image src={src} alt={alt} width={300} height={380} className="w-full h-full object-cover object-top" />
-                      </button>
-                      <span className="text-[10px] text-stardust/80 uppercase tracking-widest">{label}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Size selector — slides in when checked */}
-                {shirtPreorder && (
-                  <div className="mt-3">
-                    <label className="label-field mb-1">Size *</label>
-                    <select
-                      value={shirtSize}
-                      onChange={(e) => setShirtSize(e.target.value)}
-                      className="input-field"
-                      required={shirtPreorder}
-                    >
-                      <option value="">Select size...</option>
-                      {SHIRT_SIZES.map((size) => (
-                        <option key={size} value={size}>{size}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </div>
-            </label>
-          </fieldset>
-
           {/* Price summary + promo code */}
           <div className="card p-5 space-y-3">
             {/* Race entry */}
@@ -510,14 +428,6 @@ export default function RegisterPage() {
               <span className="text-stardust/100">Race entry</span>
               <span className="text-moonlight">${RACE_INFO.price.toFixed(2)}</span>
             </div>
-
-            {/* Shirt add-on */}
-            {shirtPreorder && (
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-stardust/100">T-shirt pre-order{shirtSize ? ` (${shirtSize})` : ''}</span>
-                <span className="text-moonlight">+${SHIRT_PREORDER_PRICE.toFixed(2)}</span>
-              </div>
-            )}
 
             {/* Promo code row */}
             <div className="pt-1">
@@ -609,39 +519,6 @@ export default function RegisterPage() {
           </p>
         </form>
       </div>
-
-      {/* Shirt lightbox */}
-      {lightbox && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-6"
-          onClick={() => setLightbox(null)}
-        >
-          <div
-            className="relative max-w-sm w-full"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setLightbox(null)}
-              className="absolute -top-3 -right-3 z-10 w-8 h-8 rounded-full bg-midnight-900 border border-lunar-400/20 flex items-center justify-center text-stardust/80 hover:text-moonlight transition-colors"
-              aria-label="Close"
-            >
-              <X size={15} />
-            </button>
-            <div className="rounded-2xl overflow-hidden border border-lunar-400/20 bg-white/5">
-              <Image
-                src={lightbox === 'front' ? '/shirt-front.jpg' : '/shirt-back.jpg'}
-                alt={lightbox === 'front' ? 'Shirt front' : 'Shirt back'}
-                width={600}
-                height={720}
-                className="w-full h-auto"
-              />
-            </div>
-            <p className="text-center text-xs text-stardust/100 uppercase tracking-widest mt-3">
-              {lightbox === 'front' ? 'Front' : 'Back'} — click anywhere to close
-            </p>
-          </div>
-        </div>
-      )}
     </section>
   );
 }

@@ -231,7 +231,7 @@ export default function HomePage() {
               },
               {
                 q: 'Is there a shirt?',
-                a: 'T-shirt pre-order is $22 (optional) and available during registration.',
+                a: 'T-shirt pre-order is closed — we’re not taking additional shirt orders for this year’s race.',
               },
               {
                 q: 'What’s at the finish?',
