@@ -148,11 +148,15 @@ export default async function DashboardPage() {
                   { icon: Calendar, label: 'Race Date', value: RACE_INFO.date },
                   { icon: Clock, label: 'Start Time', value: RACE_INFO.time },
                   { icon: MapPin, label: 'Location', value: 'Prospect Park, Brooklyn' },
-                  {
-                    icon: Shirt,
-                    label: 'Shirt Size',
-                    value: reg.shirt_size || 'Not selected',
-                  },
+                  ...(reg.shirt_size
+                    ? [
+                        {
+                          icon: Shirt,
+                          label: 'Shirt Size',
+                          value: reg.shirt_size,
+                        },
+                      ]
+                    : []),
                   {
                     icon: CreditCard,
                     label: 'Amount Paid',
