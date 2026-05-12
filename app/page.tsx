@@ -16,7 +16,7 @@ export default function HomePage() {
           {/* Logo */}
           <div className="mx-auto w-full max-w-[1000px] sm:max-w-[600px] mb-8 logo-glow">
             <Image
-              src="/blue-moon-run-logo-stroked.png"
+              src="/logo.png"
               alt="Blue Moon 5 Miler logo"
               width={1024}
               height={1024}

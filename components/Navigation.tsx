@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import { isAdmin } from '@/lib/admin';
@@ -61,9 +62,16 @@ export function Navigation() {
         {/* Logo */}
         <Link
           href="/"
-          className="font-display text-lg text-moonlight tracking-wide hover:text-white transition-colors"
+          className="flex items-center shrink-0 min-w-0 py-1 opacity-95 hover:opacity-100 transition-opacity"
         >
-          Blue Moon 5 Miler - Commonwealth Running
+          <Image
+            src="/nav logo.png"
+            alt="Blue Moon 5 Miler — Commonwealth Running"
+            width={1024}
+            height={214}
+            className="h-8 md:h-9 w-auto max-w-[calc(100vw-7rem)] object-contain object-left"
+            priority
+          />
         </Link>
 
         {/* Desktop nav */}
