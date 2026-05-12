@@ -213,22 +213,22 @@ export default async function DashboardPage() {
               <div className="space-y-4">
                 {[
                   {
-                    time: '7:30 PM',
+                    time: '6:45 PM',
                     title: 'Arrive + check in',
-                    desc: 'Arrive by 7:30 PM. Start location is marked on the course map (green dot).',
+                    desc: 'Arrive by 6:45 PM for check-in. Start location is marked on the course map (green dot).',
                   },
                   {
-                    time: '7:55 PM',
+                    time: '7:20 PM',
                     title: 'Line up',
                     desc: 'Get to the start and get ready. The race is self-timed.',
                   },
                   {
-                    time: '8:00 PM',
+                    time: '7:30 PM',
                     title: 'Race starts',
                     desc: "The gun goes off and you're running under the Blue Moon. Enjoy every mile.",
                   },
                   {
-                    time: '~9:00 PM',
+                    time: '8:30 PM',
                     title: 'Post-race hang',
                     desc: 'We’ll have Blue Moon’s new non-alcoholic beer line at the finish. Hang out, cool down, and stick around.',
                   },

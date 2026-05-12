@@ -226,7 +226,7 @@ export async function POST(request: NextRequest) {
           currency: 'usd',
           product_data: {
             name: 'Blue Moon 5 Miler — Race Entry',
-            description: `Sunday, May 31st · Prospect Park · 8:00 PM${promo.valid ? ' (promo applied)' : ''}`,
+            description: `Sunday, May 31st · Prospect Park · 7:30 PM${promo.valid ? ' (promo applied)' : ''}`,
           },
           unit_amount: Math.round(entryPrice * 100),
         },

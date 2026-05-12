@@ -27,7 +27,7 @@ export default function HomePage() {
 
           {/* Subtitle */}
           <p className="font-body text-base sm:text-lg text-stardust/100 max-w-lg mx-auto leading-relaxed mb-4">
-            {RACE_INFO.date} · Prospect Park · 8:00 PM Start
+            {RACE_INFO.date} · Prospect Park · {RACE_INFO.time}
           </p>
           <p className="font-body text-sm text-stardust/100 max-w-xl mx-auto leading-relaxed">
             A blue moon only comes around once every three years. We’re running it.
@@ -82,8 +82,8 @@ export default function HomePage() {
                 },
                 {
                   icon: Clock,
-                  title: '8:00 PM Start',
-                  desc: 'Arrive by 7:30 PM for check-in',
+                  title: '7:30 PM Start',
+                  desc: 'Arrive by 6:45 PM for check-in',
                 },
                 {
                   icon: Route,
@@ -129,7 +129,7 @@ export default function HomePage() {
               {
                 icon: '🕗',
                 title: 'Start + Check-in',
-                desc: 'Start Time: 8:00 PM. Check-in: arrive by 7:30 PM.',
+                desc: 'Start Time: 7:30 PM. Check-in: arrive by 6:45 PM.',
               },
               {
                 icon: '🗺️',

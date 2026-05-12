@@ -26,11 +26,11 @@ const monoFont = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Blue Moon 5 Miler — Commonwealth Running Club',
   description:
-    'A blue moon only comes around once every three years. We’re running it. Join us for a 5-mile night race in Prospect Park on Sunday, May 31st at 8:00 PM.',
+    'A blue moon only comes around once every three years. We’re running it. Join us for a 5-mile night race in Prospect Park on Sunday, May 31st at 7:30 PM.',
   keywords: ['running', 'race', 'Brooklyn', 'Prospect Park', '5 mile', 'Blue Moon', 'Commonwealth'],
   openGraph: {
     title: 'Blue Moon 5 Miler',
-    description: 'Sunday, May 31st · Prospect Park · 8:00 PM Start',
+    description: 'Sunday, May 31st · Prospect Park · 7:30 PM Start',
     type: 'website',
   },
 };
