@@ -271,7 +271,7 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <p className="text-xs text-stardust/40">
-                  No shirt pre-order on this registration.
+                  No shirt pre-order on this registration. (Some shirts may be available for purchase at the race.)
                 </p>
               )}
             </div>
