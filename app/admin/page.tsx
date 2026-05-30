@@ -139,7 +139,7 @@ export default function AdminOverview() {
               {stats.registrationsByDay.map((day) => (
                 <div
                   key={day.date}
-                  className="flex-1 flex flex-col items-center justify-end group relative"
+                  className="flex-1 flex flex-col items-center justify-end group relative h-full"
                 >
                   <div
                     className="w-full bg-midnight-400/60 rounded-t-sm min-h-[2px] transition-all hover:bg-midnight-400"
