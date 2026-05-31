@@ -45,6 +45,7 @@ export function Navigation() {
   };
 
   const publicLinks = [
+    { href: '/race-day', label: 'Race Day' },
     { href: '/#about', label: 'About' },
     { href: '/#details', label: 'Details' },
     { href: '/contact', label: 'Contact' },

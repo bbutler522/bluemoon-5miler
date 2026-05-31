@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Countdown } from '@/components/Countdown';
-import { MapPin, Calendar, Clock, Route, Users, Trophy } from 'lucide-react';
+import { MapPin, Calendar, Clock, Route, ArrowRight } from 'lucide-react';
 import { RACE_INFO } from '@/lib/constants';
 
 export default function HomePage() {
@@ -34,12 +34,25 @@ export default function HomePage() {
           </p>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+          <div className="flex flex-col items-center gap-5 mt-8 w-full max-w-md mx-auto">
+            <Link
+              href="/race-day"
+              className="group w-full card p-5 sm:p-6 text-left animate-pulse-glow hover:border-lunar-400/35 hover:shadow-[0_0_40px_rgba(74,108,247,0.15)] transition-all duration-300"
+            >
+              <p className="label-field mb-2">Race day is here</p>
+              <p className="font-display text-lg sm:text-xl text-moonlight leading-snug">
+                Check-in times, route maps &amp; everything you need
+              </p>
+              <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-body font-semibold uppercase tracking-wide text-stardust/80 group-hover:text-moonlight transition-colors">
+                View race day info
+                <ArrowRight
+                  size={14}
+                  className="transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </span>
+            </Link>
             <Link href="/register" className="btn-primary">
               Register Now — ${RACE_INFO.price}
-            </Link>
-            <Link href="/#about" className="btn-secondary">
-              Learn More
             </Link>
           </div>
           </div>

@@ -21,6 +21,12 @@ export function Footer() {
             <p className="label-field mb-4">Race</p>
             <div className="space-y-2">
               <Link
+                href="/race-day"
+                className="block text-sm text-stardust/100 hover:text-moonlight transition-colors"
+              >
+                Race Day Info
+              </Link>
+              <Link
                 href="/#about"
                 className="block text-sm text-stardust/100 hover:text-moonlight transition-colors"
               >
