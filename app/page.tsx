@@ -14,7 +14,7 @@ export default function HomePage() {
 
         <div className="relative z-10 max-w-3xl mx-auto text-center">
           {/* Logo */}
-          <div className="mx-auto w-full max-w-[1000px] sm:max-w-[600px] mb-8 logo-glow">
+          <div className="mx-auto w-full max-w-[1000px] sm:max-w-[600px] mb-6 logo-glow">
             <Image
               src="/logo.png"
               alt="Blue Moon 5 Miler logo"
@@ -25,6 +25,24 @@ export default function HomePage() {
             />
           </div>
 
+          {/* Race day CTA */}
+          <Link
+            href="/race-day"
+            className="group block w-full max-w-md mx-auto mb-6 card p-5 sm:p-6 text-left animate-pulse-glow hover:border-lunar-400/35 hover:shadow-[0_0_40px_rgba(74,108,247,0.15)] transition-all duration-300"
+          >
+            <p className="label-field mb-2">Race day is here!</p>
+            <p className="font-display text-lg sm:text-xl text-moonlight leading-snug">
+              Check-in times, route maps &amp; everything you need
+            </p>
+            <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-body font-semibold uppercase tracking-wide text-stardust/80 group-hover:text-moonlight transition-colors">
+              View race day info
+              <ArrowRight
+                size={14}
+                className="transition-transform duration-300 group-hover:translate-x-1"
+              />
+            </span>
+          </Link>
+
           {/* Subtitle */}
           <p className="font-body text-base sm:text-lg text-stardust/100 max-w-lg mx-auto leading-relaxed mb-4">
             {RACE_INFO.date} · Prospect Park · {RACE_INFO.time}
@@ -34,23 +52,7 @@ export default function HomePage() {
           </p>
 
           {/* CTAs */}
-          <div className="flex flex-col items-center gap-5 mt-8 w-full max-w-md mx-auto">
-            <Link
-              href="/race-day"
-              className="group w-full card p-5 sm:p-6 text-left animate-pulse-glow hover:border-lunar-400/35 hover:shadow-[0_0_40px_rgba(74,108,247,0.15)] transition-all duration-300"
-            >
-              <p className="label-field mb-2">Race day is here</p>
-              <p className="font-display text-lg sm:text-xl text-moonlight leading-snug">
-                Check-in times, route maps &amp; everything you need
-              </p>
-              <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-body font-semibold uppercase tracking-wide text-stardust/80 group-hover:text-moonlight transition-colors">
-                View race day info
-                <ArrowRight
-                  size={14}
-                  className="transition-transform duration-300 group-hover:translate-x-1"
-                />
-              </span>
-            </Link>
+          <div className="mt-8">
             <Link href="/register" className="btn-primary">
               Register Now — ${RACE_INFO.price}
             </Link>
