@@ -39,10 +39,10 @@ export function Footer() {
                 Race Details
               </Link>
               <Link
-                href="/register"
+                href="/login?redirect=/dashboard"
                 className="block text-sm text-stardust/100 hover:text-moonlight transition-colors"
               >
-                Register
+                Runner Dashboard
               </Link>
             </div>
           </div>

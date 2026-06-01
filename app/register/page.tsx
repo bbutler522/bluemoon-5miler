@@ -5,7 +5,12 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import { Moon } from '@/components/Moon';
 import MagicLinkForm from '@/components/MagicLinkForm';
-import { RACE_INFO, GENDER_OPTIONS } from '@/lib/constants';
+import {
+  RACE_INFO,
+  GENDER_OPTIONS,
+  REGISTRATION_OPEN,
+  REGISTRATION_STATUS_MESSAGE,
+} from '@/lib/constants';
 import { Loader2, CheckCircle2, CheckCircle, XCircle, Tag } from 'lucide-react';
 
 const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
@@ -290,6 +295,42 @@ export default function RegisterPage() {
             >
               Sign Out
             </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (!REGISTRATION_OPEN) {
+    return (
+      <section className="min-h-screen flex items-center justify-center px-6 pt-16 pb-20">
+        <div className="max-w-md w-full text-center">
+          <div className="mx-auto w-14 h-14 mb-6 opacity-60">
+            <Moon />
+          </div>
+          <h1 className="font-display text-3xl text-moonlight mb-3">Registration Closed</h1>
+          <p className="text-sm text-stardust/80 mb-8">{REGISTRATION_STATUS_MESSAGE}</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            {user ? (
+              <>
+                <button onClick={() => router.push('/dashboard')} className="btn-primary">
+                  Go to Dashboard
+                </button>
+                <button
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    router.push('/');
+                  }}
+                  className="btn-secondary"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <button onClick={() => router.push('/login?redirect=/dashboard')} className="btn-primary">
+                Sign In
+              </button>
+            )}
           </div>
         </div>
       </section>

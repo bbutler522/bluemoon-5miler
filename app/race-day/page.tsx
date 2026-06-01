@@ -227,8 +227,8 @@ export default function RaceDayPage() {
         </div>
 
         <div className="mt-12 text-center">
-          <Link href="/register" className="btn-primary">
-            Register Now — ${RACE_INFO.price}
+          <Link href="/login?redirect=/dashboard" className="btn-primary">
+            Sign In to Dashboard
           </Link>
         </div>
       </div>

@@ -283,14 +283,14 @@ export default async function DashboardPage() {
               <Moon />
             </div>
             <h2 className="font-display text-xl text-moonlight mb-2">
-              No registration yet
+              Registration Closed
             </h2>
             <p className="text-sm text-stardust/100 mb-6">
-              You haven&apos;t registered for the Blue Moon 5 Miler yet.
+              Race day has passed. Registration and payments are now disabled.
             </p>
-            <a href="/register" className="btn-primary inline-block">
-              Register Now — ${RACE_INFO.price}
-            </a>
+            <Link href="/race-day" className="btn-secondary inline-block">
+              View Race Day Info
+            </Link>
           </div>
         )}
       </div>

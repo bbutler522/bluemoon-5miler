@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase, createAdminSupabase } from '@/lib/supabase-server';
 import { stripe } from '@/lib/stripe';
-import { RACE_INFO, RACE_CAPACITY } from '@/lib/constants';
+import { RACE_INFO, RACE_CAPACITY, REGISTRATION_OPEN, REGISTRATION_STATUS_MESSAGE } from '@/lib/constants';
 import { resolvePromo } from '@/lib/promo';
 
 async function assignBibBestEffort(
@@ -70,6 +70,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
+      );
+    }
+
+    if (!REGISTRATION_OPEN) {
+      return NextResponse.json(
+        { error: REGISTRATION_STATUS_MESSAGE },
+        { status: 403 }
       );
     }
 

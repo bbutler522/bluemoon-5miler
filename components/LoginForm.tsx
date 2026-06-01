@@ -8,7 +8,7 @@ import MagicLinkForm from '@/components/MagicLinkForm';
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/register';
+  const redirect = searchParams.get('redirect') || '/dashboard';
   const [authLinkMessage, setAuthLinkMessage] = useState('');
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export default function LoginForm() {
         )}
         <MagicLinkForm
           redirectTo={redirect}
-          subtitle="Enter your email and we&apos;ll send you a secure link to register for the Blue Moon 5 Miler and access your dashboard."
+          subtitle="Enter your email and we&apos;ll send you a secure link to access your dashboard."
         />
 
         <p className="text-center text-[11px] text-stardust/40 mt-6">

@@ -123,9 +123,9 @@ export function Navigation() {
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              <Link href="/register" className="btn-primary !py-2 !px-5 !text-xs">
-                Register
-              </Link>
+              <span className="btn-secondary !py-2 !px-5 !text-xs !cursor-default !border-lunar-400/20 !text-stardust/80">
+                Registration Closed
+              </span>
               <Link href="/login" className="btn-secondary !py-2 !px-5 !text-xs">
                 Sign In
               </Link>
@@ -181,9 +181,9 @@ export function Navigation() {
             </>
           ) : (
             <div className="pt-2 flex flex-col gap-3">
-              <Link href="/register" className="btn-primary !py-2 !px-5 !text-xs text-center">
-                Register
-              </Link>
+              <span className="btn-secondary !py-2 !px-5 !text-xs text-center !cursor-default !border-lunar-400/20 !text-stardust/80">
+                Registration Closed
+              </span>
               <Link href="/login" className="btn-secondary !py-2 !px-5 !text-xs text-center">
                 Sign In
               </Link>

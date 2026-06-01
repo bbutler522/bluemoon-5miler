@@ -53,9 +53,9 @@ export default function HomePage() {
 
           {/* CTAs */}
           <div className="mt-8">
-            <Link href="/register" className="btn-primary">
-              Register Now — ${RACE_INFO.price}
-            </Link>
+            <span className="btn-secondary !cursor-default !border-lunar-400/20 !text-stardust/90">
+              Registration Closed
+            </span>
           </div>
           </div>
 
@@ -207,19 +207,19 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== PRICING CTA ===== */}
+      {/* ===== RACE STATUS ===== */}
       <section className="relative py-32 px-6">
         <div className="max-w-2xl mx-auto text-center">
           <div className="card p-10 sm:p-14 animate-pulse-glow">
-            <p className="label-field mb-4">Registration</p>
+            <p className="label-field mb-4">Race Status</p>
             <h2 className="font-display text-4xl sm:text-5xl text-moonlight mb-3">
-              ${RACE_INFO.price}
+              Registration Closed
             </h2>
             <p className="text-sm text-stardust/100 mb-8">
-              ${RACE_INFO.price} standard entry. ${RACE_INFO.price - 3} if you completed the pre-survey (discount code sent via email).
+              Thanks to everyone who came out. You can still sign in to view your dashboard and race info.
             </p>
-            <Link href="/register" className="btn-primary">
-              Register Now
+            <Link href="/login?redirect=/dashboard" className="btn-primary">
+              Sign In to Dashboard
             </Link>
             {/* <p className="text-xs text-stardust/80 mt-6">
               Register by Sunday, May 3rd. Spots are limited.

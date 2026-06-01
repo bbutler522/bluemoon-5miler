@@ -310,11 +310,7 @@ export default function ProfilePage() {
           <div className="card p-8 text-center">
             <User size={24} className="text-stardust/20 mx-auto mb-3" />
             <p className="text-sm text-stardust/40">
-              No registration to edit.{' '}
-              <Link href="/register" className="text-moonlight underline">
-                Register first
-              </Link>
-              .
+              No registration found for this account. Race registration is now closed.
             </p>
           </div>
         )}

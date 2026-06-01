@@ -12,6 +12,9 @@ export const RACE_INFO: RaceInfo = {
 };
 
 export const RACE_DATE = new Date('2026-05-31T19:30:00-04:00');
+export const REGISTRATION_OPEN = false;
+export const REGISTRATION_STATUS_MESSAGE =
+  'Registration is closed because race day has passed.';
 
 // Race capacity — once this many paid registrations exist, new signups go to waitlist
 export const RACE_CAPACITY = 200;
